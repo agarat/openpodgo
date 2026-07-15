@@ -47,6 +47,24 @@ not: Linux.
 - A POD Go connected over USB
 - For the UI: a Qt-capable desktop (PySide6 is installed via the `ui` extra)
 
+## Download
+
+Prebuilt tarballs are attached to each GitHub Release:
+
+- **Latest (nightly del trunk):** the rolling `latest` pre-release always tracks
+  the freshest commit on `main`.
+- **Estables:** numbered releases (`X.Y.Z`) cut from the trunk.
+
+Grab `openpodgo-<ver>.tar.gz` from
+[Releases](https://github.com/agarat/openpodgo/releases) and install it:
+
+```bash
+python3 -m venv .venv && . .venv/bin/activate
+pip install "openpodgo-<ver>.tar.gz[ui]"     # incluye la UI
+```
+
+Para USB sin sudo, ver la sección "USB access without sudo" más abajo.
+
 ## Install
 
 ```bash
