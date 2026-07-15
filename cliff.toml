@@ -1,7 +1,10 @@
-# Config de git-cliff para notas de release de openpodgo.
-# Agrupa por el prefijo de scope usado en el repo (catalog:, openpodgo:, docs:, ci:).
+# git-cliff config for openpodgo's release notes.
+# Groups commits by the scope prefix used in this repo (catalog:, openpodgo:, docs:, ci:, ...).
 [changelog]
 header = ""
+# NOTE: inside this TOML triple-quoted body, a \n is already a literal newline by the
+# time Tera parses the template, so split(pat="\n") below splits on real newlines.
+# Do not "escape" it to \\n — that would break the first-line truncation.
 body = """
 {% for group, commits in commits | group_by(attribute="group") %}
 ### {{ group }}
@@ -13,7 +16,6 @@ trim = true
 
 [git]
 conventional_commits = false
-filter_unconventional = false
 split_commits = false
 commit_parsers = [
   { message = "^catalog", group = "Catálogo" },
