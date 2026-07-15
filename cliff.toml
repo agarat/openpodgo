@@ -1,0 +1,31 @@
+# Config de git-cliff para notas de release de openpodgo.
+# Agrupa por el prefijo de scope usado en el repo (catalog:, openpodgo:, docs:, ci:).
+[changelog]
+header = ""
+body = """
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group }}
+{% for commit in commits %}
+- {{ commit.message | split(pat="\n") | first | trim }}{% endfor %}
+{% endfor %}
+"""
+trim = true
+
+[git]
+conventional_commits = false
+filter_unconventional = false
+split_commits = false
+commit_parsers = [
+  { message = "^catalog", group = "Catálogo" },
+  { message = "^openpodgo", group = "Core" },
+  { message = "^ui", group = "UI" },
+  { message = "^build", group = "Build" },
+  { message = "^ci", group = "CI" },
+  { message = "^docs", group = "Documentación" },
+  { message = "^test", group = "Tests" },
+  { message = "^fix", group = "Fixes" },
+  { message = ".*", group = "Otros" },
+]
+filter_commits = false
+tag_pattern = "v[0-9]*"
+sort_commits = "newest"
