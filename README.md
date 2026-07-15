@@ -51,19 +51,19 @@ not: Linux.
 
 Prebuilt tarballs are attached to each GitHub Release:
 
-- **Latest (nightly del trunk):** the rolling `latest` pre-release always tracks
-  the freshest commit on `main`.
-- **Estables:** numbered releases (`X.Y.Z`) cut from the trunk.
+- **Latest (nightly build of the trunk):** the rolling `latest` pre-release always
+  tracks the freshest commit on `main`.
+- **Stable:** numbered releases (`X.Y.Z`) cut from the trunk.
 
 Grab `openpodgo-<ver>.tar.gz` from
 [Releases](https://github.com/agarat/openpodgo/releases) and install it:
 
 ```bash
 python3 -m venv .venv && . .venv/bin/activate
-pip install "openpodgo-<ver>.tar.gz[ui]"     # incluye la UI
+pip install "openpodgo-<ver>.tar.gz[ui]"     # includes the UI
 ```
 
-Para USB sin sudo, ver la sección "USB access without sudo" más abajo.
+For USB access without sudo, see "USB access without sudo" below.
 
 ## Install
 

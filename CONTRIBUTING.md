@@ -44,22 +44,23 @@ USB vendor interface.
 By contributing you agree that your contributions are licensed under the
 project's [MIT License](LICENSE).
 
-## Releases (TBD)
+## Releases
 
-El proyecto usa Trunk-Based Development. La versión se deriva del git con
-setuptools-scm; no se edita a mano.
+The project uses Trunk-Based Development. The version is derived from git with
+setuptools-scm; it is never edited by hand.
 
-- **Cada push a `main`** dispara `release.yml`: corre los tests, arma sdist+wheel
-  y **pisa** el pre-release rodante `latest` con notas generadas de los commits.
-- **Cortar un estable:** desde `main` actualizado,
+- **Every push to `main`** triggers `release.yml`: it runs the tests, builds the
+  sdist+wheel, and overwrites the rolling `latest` pre-release with notes
+  generated from the commits.
+- **Cutting a stable release:** from an up-to-date `main`,
 
   ```bash
   git tag v0.2.0
   git push origin v0.2.0
   ```
 
-  El pipeline crea el Release permanente `0.2.0` con sdist+wheel y el changelog
-  del rango desde el tag anterior.
+  The pipeline creates the permanent `0.2.0` Release with the sdist+wheel and the
+  changelog for the range since the previous tag.
 
-El changelog sale de los mensajes de commit (`cliff.toml`); no hay `CHANGELOG.md`
-versionado en el repo.
+The changelog comes from commit messages (`cliff.toml`); there is no `CHANGELOG.md`
+tracked in the repo.
