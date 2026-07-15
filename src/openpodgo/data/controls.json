@@ -1,0 +1,5404 @@
+{
+  "4VoiceChorus_Rate": {
+    "displayToWidgetScale": 10,
+    "step": [
+      {
+        "fine": 0.1,
+        "coarse": 1
+      }
+    ],
+    "format": "%.1f",
+    "formatUnits": "%.1f Hz"
+  },
+  "amp_elmsley_nfb": {
+    "dspToDisplayScale": 1,
+    "displayToWidgetScale": 100,
+    "step": {
+      "fine": 0.01,
+      "coarse": 1.0
+    },
+    "format": [
+      {
+        "lowerBound": 0.0,
+        "upperBound": 1.0,
+        "format": "%.2f"
+      },
+      {
+        "lowerBound": 1.0,
+        "upperBound": 1.1,
+        "format": "%.1f"
+      }
+    ]
+  },
+  "blend": {
+    "minimumValue": -100.0,
+    "maximumValue": 100.0,
+    "format": [
+      {
+        "lowerBound": -100.0,
+        "upperBound": -0.5,
+        "format": "%.0f",
+        "formatUnits": "Woofer %.0f",
+        "unitsMultiplier": -1
+      },
+      {
+        "lowerBound": -0.5,
+        "upperBound": 0.5,
+        "format": "%.0f",
+        "formatUnits": "Equal"
+      },
+      {
+        "lowerBound": 0.5,
+        "upperBound": 100.1,
+        "format": "%.0f",
+        "formatUnits": "Horn %.0f"
+      }
+    ],
+    "step": {
+      "fine": 1,
+      "coarse": 10
+    }
+  },
+  "cab_mic_distance": {
+    "canDisplayHigherRes": true,
+    "displayToWidgetScale": 2,
+    "format": "%.1f",
+    "formatUnits": "%.1f \"",
+    "step": {
+      "fine": 0.5,
+      "coarse": 2.0
+    }
+  },
+  "CabMicIr_Distance": {
+    "canDisplayHigherRes": true,
+    "displayToWidgetScale": 4,
+    "format": "%.2f",
+    "formatUnits": "%.2f \"",
+    "step": {
+      "fine": 0.25,
+      "coarse": 1.0
+    }
+  },
+  "CabMicIrs_Angle": {
+    "controlType": "segmented",
+    "dspToDisplayScale": 1,
+    "displayToWidgetScale": 0.022222,
+    "format": "%.0f deg",
+    "formatUnits": "%.0f deg"
+  },
+  "CabMicIr_Position": {
+    "dspToDisplayScale": 10,
+    "displayToWidgetScale": 10,
+    "format": [
+      {
+        "lowerBound": 0.00,
+        "upperBound": 0.09,
+        "format": "%.1f",
+        "formatUnits": "Center"
+      },
+      {
+        "lowerBound": 0.09,
+        "upperBound": 10.0,
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 10.0,
+        "upperBound": 10.1,
+        "format": "%.1f",
+        "formatUnits": "Edge"
+      }
+    ],
+    "step": {
+      "fine": 0.01,
+      "coarse": 0.1
+    }
+  },
+  "cents": {
+    "canDisplayHigherRes": true,
+    "displayToWidgetScale": 10,
+    "format": [
+      {
+        "lowerBound": -99999,
+        "upperBound": -50.001,
+        "format": "%+.1f"
+      },
+      {
+        "lowerBound": -50.001,
+        "upperBound": -49.999,
+        "format": "%+.0f"
+      },
+      {
+        "lowerBound": -49.999,
+        "upperBound": -0.999,
+        "format": "%+.1f"
+      },
+      {
+        "lowerBound": -0.999,
+        "upperBound": 0.999,
+        "format": "%+.2f"
+      },
+      {
+        "lowerBound": 1.0,
+        "upperBound": 49.999,
+        "format": "%+.1f"
+      },
+      {
+        "lowerBound": 49.999,
+        "upperBound": 50.001,
+        "format": "%+.0f"
+      },
+      {
+        "lowerBound": 50.001,
+        "upperBound": 99999,
+        "format": "%+.1f"
+      }
+    ],
+    "step": {
+      "fine": 0.2,
+      "coarse": 1.0
+    }
+  },
+  "dynamix_flanger_mix": {
+    "canDisplayHigherRes": true,
+    "dspToDisplayScale": 100.0,
+    "format": [
+      {
+        "lowerBound": 0.0,
+        "upperBound": 0.9,
+        "format": "%.0f",
+        "formatUnits": "Out"
+      },
+      {
+        "lowerBound": 0.9,
+        "upperBound": 49.5,
+        "format": "%.0f",
+        "formatUnits": "%.0f %%"
+      },
+      {
+        "lowerBound": 49.5,
+        "upperBound": 50.5,
+        "format": "%.0f",
+        "formatUnits": "In"
+      },
+      {
+        "lowerBound": 50.5,
+        "upperBound": 99.5,
+        "format": "%.0f",
+        "formatUnits": "%.0f %%"
+      },
+      {
+        "lowerBound": 99.5,
+        "upperBound": 100.01,
+        "format": "%.0f",
+        "formatUnits": "Delay"
+      }
+    ],
+    "step": {
+      "fine": 1.0,
+      "coarse": 10.0
+    }
+  },
+  "eq_high_cut": {
+    "canDisplayHigherRes": true,
+    "displayToWidgetScale": 10,
+    "step": [
+      {
+        "lowerBound": 0.0,
+        "upperBound": 20.0,
+        "fine": 0.1,
+        "coarse": 1
+      },
+      {
+        "lowerBound": 20.0,
+        "upperBound": 100.0,
+        "fine": 1,
+        "coarse": 10
+      },
+      {
+        "lowerBound": 100.0,
+        "upperBound": 1000.0,
+        "fine": 10,
+        "coarse": 100
+      },
+      {
+        "lowerBound": 1000.0,
+        "upperBound": 99999.0,
+        "fine": 100,
+        "coarse": 1000
+      }
+    ],
+    "format": [
+      {
+        "lowerBound": 0.0,
+        "upperBound": 1000.0,
+        "format": "%.0f",
+        "formatUnits": "%.0f Hz"
+      },
+      {
+        "lowerBound": 1000.0,
+        "upperBound": 20000.1,
+        "unitsMultiplier": 0.001,
+        "format": "%.0f",
+        "formatUnits": "%.1f kHz"
+      },
+      {
+        "lowerBound": 20000.1,
+        "upperBound": 99999.0,
+        "format": "Off"
+      }
+    ]
+  },
+  "eq_high_cut_GEQ": {
+    "canDisplayHigherRes": true,
+    "displayToWidgetScale": 10,
+    "step": [
+      {
+        "lowerBound": 0.0,
+        "upperBound": 20.0,
+        "fine": 0.1,
+        "coarse": 1
+      },
+      {
+        "lowerBound": 20.0,
+        "upperBound": 100.0,
+        "fine": 1,
+        "coarse": 10
+      },
+      {
+        "lowerBound": 100.0,
+        "upperBound": 1000.0,
+        "fine": 10,
+        "coarse": 100
+      },
+      {
+        "lowerBound": 1000.0,
+        "upperBound": 99999.0,
+        "fine": 100,
+        "coarse": 1000
+      }
+    ],
+    "format": [
+      {
+        "lowerBound": 0.0,
+        "upperBound": 1000.0,
+        "format": "%.0f",
+        "formatUnits": "%.0f Hz"
+      },
+      {
+        "lowerBound": 1000.0,
+        "upperBound": 20000.1,
+        "unitsMultiplier": 0.001,
+        "format": "%.0f",
+        "formatUnits": "%.1f kHz"
+      },
+      {
+        "lowerBound": 20000.1,
+        "upperBound": 99999.0,
+        "format": "Off"
+      }
+    ]
+  },
+  "eq_low_cut": {
+    "canDisplayHigherRes": true,
+    "displayToWidgetScale": 10,
+    "step": [
+      {
+        "lowerBound": 0.0,
+        "upperBound": 20.0,
+        "fine": 0.1,
+        "coarse": 1
+      },
+      {
+        "lowerBound": 20.0,
+        "upperBound": 100.0,
+        "fine": 1,
+        "coarse": 10
+      },
+      {
+        "lowerBound": 100.0,
+        "upperBound": 1000.0,
+        "fine": 10,
+        "coarse": 100
+      },
+      {
+        "lowerBound": 1000.0,
+        "upperBound": 99999.0,
+        "fine": 100,
+        "coarse": 1000
+      }
+    ],
+    "format": [
+      {
+        "lowerBound": 0.0,
+        "upperBound": 20.0,
+        "format": "Off",
+        "formatUnits": "Off"
+      },
+      {
+        "lowerBound": 20.0,
+        "upperBound": 1000.0,
+        "format": "%.0f",
+        "formatUnits": "%.0f Hz"
+      },
+      {
+        "lowerBound": 1000.0,
+        "upperBound": 99999.0,
+        "unitsMultiplier": 0.001,
+        "format": "%.0f",
+        "formatUnits": "%.1f kHz"
+      }
+    ]
+  },
+  "eq_low_cut_GEQ": {
+    "canDisplayHigherRes": true,
+    "displayToWidgetScale": 10,
+    "step": [
+      {
+        "lowerBound": 0.0,
+        "upperBound": 20.0,
+        "fine": 0.1,
+        "coarse": 1
+      },
+      {
+        "lowerBound": 20.0,
+        "upperBound": 100.0,
+        "fine": 1,
+        "coarse": 10
+      },
+      {
+        "lowerBound": 100.0,
+        "upperBound": 1000.0,
+        "fine": 10,
+        "coarse": 100
+      },
+      {
+        "lowerBound": 1000.0,
+        "upperBound": 99999.0,
+        "fine": 100,
+        "coarse": 1000
+      }
+    ],
+    "format": [
+      {
+        "lowerBound": 0.0,
+        "upperBound": 20.0,
+        "format": "Off",
+        "formatUnits": "Off"
+      },
+      {
+        "lowerBound": 20.0,
+        "upperBound": 1000.0,
+        "format": "%.0f",
+        "formatUnits": "%.0f Hz"
+      },
+      {
+        "lowerBound": 1000.0,
+        "upperBound": 99999.0,
+        "unitsMultiplier": 0.001,
+        "format": "%.0f",
+        "formatUnits": "%.1f kHz"
+      }
+    ]
+  },
+  "frequency": {
+    "canDisplayHigherRes": true,
+    "displayToWidgetScale": 10,
+    "step": [
+      {
+        "lowerBound": 0.0,
+        "upperBound": 20.0,
+        "fine": 0.1,
+        "coarse": 1
+      },
+      {
+        "lowerBound": 20.0,
+        "upperBound": 100.0,
+        "fine": 1,
+        "coarse": 10
+      },
+      {
+        "lowerBound": 100.0,
+        "upperBound": 1000.0,
+        "fine": 10,
+        "coarse": 100
+      },
+      {
+        "lowerBound": 1000.0,
+        "upperBound": 99999.0,
+        "fine": 100,
+        "coarse": 1000
+      }
+    ],
+    "format": [
+      {
+        "lowerBound": 0,
+        "upperBound": 20,
+        "format": "%.1f",
+        "formatUnits": "%.1f Hz"
+      },
+      {
+        "lowerBound": 20,
+        "upperBound": 1000,
+        "format": "%.0f",
+        "formatUnits": "%.0f Hz"
+      },
+      {
+        "lowerBound": 1000,
+        "upperBound": 999999,
+        "unitsMultiplier": 0.001,
+        "format": "%.0f",
+        "formatUnits": "%.1f kHz"
+      }
+    ]
+  },
+  "frequency_GEQ": {
+    "canDisplayHigherRes": true,
+    "displayToWidgetScale": 10,
+    "step": [
+      {
+        "lowerBound": 0.0,
+        "upperBound": 20.0,
+        "fine": 0.1,
+        "coarse": 1
+      },
+      {
+        "lowerBound": 20.0,
+        "upperBound": 100.0,
+        "fine": 1,
+        "coarse": 10
+      },
+      {
+        "lowerBound": 100.0,
+        "upperBound": 1000.0,
+        "fine": 10,
+        "coarse": 100
+      },
+      {
+        "lowerBound": 1000.0,
+        "upperBound": 99999.0,
+        "fine": 100,
+        "coarse": 1000
+      }
+    ],
+    "format": [
+      {
+        "lowerBound": 0,
+        "upperBound": 20,
+        "format": "%.1f",
+        "formatUnits": "%.1f Hz"
+      },
+      {
+        "lowerBound": 20,
+        "upperBound": 1000,
+        "format": "%.0f",
+        "formatUnits": "%.0f Hz"
+      },
+      {
+        "lowerBound": 1000,
+        "upperBound": 999999,
+        "unitsMultiplier": 0.001,
+        "format": "%.0f",
+        "formatUnits": "%.1f kHz"
+      }
+    ]
+  },
+  "FlexoVibe_Warp": {
+    "dspToDisplayScale": 1,
+    "displayToWidgetScale": 10,
+    "format": "%+.1f",
+    "step": {
+      "fine": 0.1,
+      "coarse": 0.1
+    }
+  },
+  "generic_knob": {
+    "dspToDisplayScale": 10,
+    "displayToWidgetScale": 10,
+    "format": "%.1f",
+    "step": {
+      "fine": 0.1,
+      "coarse": 1.0
+    }
+  },
+  "generic_knob_1to1": {
+    "dspToDisplayScale": 1,
+    "displayToWidgetScale": 10,
+    "format": "%.1f",
+    "step": {
+      "fine": 0.1,
+      "coarse": 1.0
+    }
+  },
+  "osc_freq": {
+    "displayToWidgetScale": 20.8333333,
+    "step": [
+      {
+        "lowerBound": -99999,
+        "upperBound": -1.1,
+        "fine": 0.096,
+        "coarse": 0.384
+      },
+      {
+        "lowerBound": -1.0999,
+        "upperBound": 1.0999,
+        "fine": 0.048,
+        "coarse": 0.192
+      },
+      {
+        "lowerBound": 1.1,
+        "upperBound": 99999,
+        "fine": 0.096,
+        "coarse": 0.384
+      }
+    ],
+    "format": [
+      {
+        "lowerBound": -99999,
+        "upperBound": -0.999,
+        "format": "%+.1f"
+      },
+      {
+        "lowerBound": -0.999,
+        "upperBound": 0.999,
+        "format": "%+.2f"
+      },
+      {
+        "lowerBound": 1.0,
+        "upperBound": 99999,
+        "format": "%+.1f"
+      }
+    ]
+  },
+  "pan": {
+    "minimumValue": -100,
+    "maximumValue": 100,
+    "zeroValue": 0.0,
+    "format": [
+      {
+        "lowerBound": -99999,
+        "upperBound": -0.5,
+        "format": "%.0f",
+        "formatUnits": "Left %.0f",
+        "unitsMultiplier": -1
+      },
+      {
+        "lowerBound": -0.5,
+        "upperBound": 0.5,
+        "format": "%.0f",
+        "formatUnits": "Center"
+      },
+      {
+        "lowerBound": 0.5,
+        "upperBound": 999999,
+        "format": "%.0f",
+        "formatUnits": "Right %.0f"
+      }
+    ],
+    "step": {
+      "fine": 1.0,
+      "coarse": 10.0
+    }
+  },
+  "percent": {
+    "dspToDisplayScale": 100,
+    "format": "%.0f",
+    "formatUnits": "%.0f %%",
+    "step": {
+      "fine": 1.0,
+      "coarse": 10.0
+    }
+  },
+  "percent_width": {
+    "dspToDisplayScale": 100,
+    "format": [
+      {
+        "lowerBound": -0.5,
+        "upperBound": 0.5,
+        "format": "%.0f",
+        "formatUnits": "Center"
+      },
+      {
+        "lowerBound": 0.5,
+        "upperBound": 99.5,
+        "format": "%.0f",
+        "formatUnits": "%.0f %%"
+      },
+      {
+        "lowerBound": 99.5,
+        "upperBound": 999999,
+        "format": "%.0f",
+        "formatUnits": "Wide"
+      }
+    ],
+    "step": {
+      "fine": 1.0,
+      "coarse": 10.0
+    }
+  },
+  "percent_zero_off": {
+    "dspToDisplayScale": 100,
+    "format": [
+      {
+        "lowerBound": -0.1,
+        "upperBound": 0.1,
+        "format": "%.0f",
+        "formatUnits": "Off"
+      },
+      {
+        "lowerBound": 0.1,
+        "upperBound": 100.1,
+        "format": "%.0f",
+        "formatUnits": "%.0f %%"
+      }
+    ],
+    "step": {
+      "fine": 1.0,
+      "coarse": 10.0
+    }
+  },
+  "q_knob_GEQ": {
+    "dspToDisplayScale": 1,
+    "displayToWidgetScale": 10,
+    "format": "%.1f",
+    "step": {
+      "fine": 0.1,
+      "coarse": 1.0
+    }
+  },
+  "raw_knob": {
+    "dspToDisplayScale": 1,
+    "displayToWidgetScale": 100,
+    "format": [
+      {
+        "lowerBound": -0.1,
+        "upperBound": 0.999,
+        "format": "%.2f"
+      },
+      {
+        "lowerBound": 0.999,
+        "upperBound": 1.001,
+        "format": "%.1f"
+      }
+    ],
+    "step": {
+      "fine": 0.01,
+      "coarse": 0.1
+    }
+  },
+  "rochester_ratio": {
+    "displayToWidgetScale": 2,
+    "format": [
+      {
+        "lowerBound": 1.0,
+        "upperBound": 7.0,
+        "format": "%.1f",
+        "formatUnits": "%.1f:1"
+      },
+      {
+        "lowerBound": 7.0,
+        "upperBound": 40.0,
+        "format": "%.0f",
+        "formatUnits": "%.0f:1"
+      },
+      {
+        "lowerBound": 40.0,
+        "upperBound": 999.0,
+        "format": "%.0f",
+        "formatUnits": "infinity:1"
+      }
+    ],
+    "step": [
+      {
+        "lowerBound": 1.0,
+        "upperBound": 7.0,
+        "fine": 0.5,
+        "coarse": 1
+      },
+      {
+        "lowerBound": 7.0,
+        "upperBound": 10.0,
+        "fine": 1,
+        "coarse": 10
+      },
+      {
+        "lowerBound": 10.0,
+        "upperBound": 999.0,
+        "fine": 5,
+        "coarse": 10
+      }
+    ]
+  },
+  "Shimmer_Mode": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Luster",
+      "Sheen"
+    ]
+  },
+  "Shimmer_pitchblend": {
+    "dspToDisplayScale": 1,
+    "displayToWidgetScale": 200,
+    "step": [
+      {
+      }
+    ],
+    "format": [
+      {
+        "lowerBound": 0.000,
+        "upperBound": 0.005,
+        "formatUnits": "A 100",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.005,
+        "upperBound": 0.010,
+        "formatUnits": "A 99",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.010,
+        "upperBound": 0.015,
+        "formatUnits": "A 98",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.015,
+        "upperBound": 0.020,
+        "formatUnits": "A 97",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.020,
+        "upperBound": 0.025,
+        "formatUnits": "A 96",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.025,
+        "upperBound": 0.030,
+        "formatUnits": "A 95",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.030,
+        "upperBound": 0.035,
+        "formatUnits": "A 94",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.035,
+        "upperBound": 0.040,
+        "formatUnits": "A 93",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.040,
+        "upperBound": 0.045,
+        "formatUnits": "A 92",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.045,
+        "upperBound": 0.050,
+        "formatUnits": "A 91",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.050,
+        "upperBound": 0.055,
+        "formatUnits": "A 90",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.055,
+        "upperBound": 0.060,
+        "formatUnits": "A 89",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.060,
+        "upperBound": 0.065,
+        "formatUnits": "A 88",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.065,
+        "upperBound": 0.070,
+        "formatUnits": "A 87",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.070,
+        "upperBound": 0.075,
+        "formatUnits": "A 86",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.075,
+        "upperBound": 0.080,
+        "formatUnits": "A 85",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.080,
+        "upperBound": 0.085,
+        "formatUnits": "A 84",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.085,
+        "upperBound": 0.090,
+        "formatUnits": "A 83",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.090,
+        "upperBound": 0.095,
+        "formatUnits": "A 82",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.095,
+        "upperBound": 0.100,
+        "formatUnits": "A 81",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.100,
+        "upperBound": 0.105,
+        "formatUnits": "A 80",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.105,
+        "upperBound": 0.110,
+        "formatUnits": "A 79",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.110,
+        "upperBound": 0.115,
+        "formatUnits": "A 78",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.115,
+        "upperBound": 0.120,
+        "formatUnits": "A 77",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.120,
+        "upperBound": 0.125,
+        "formatUnits": "A 76",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.125,
+        "upperBound": 0.130,
+        "formatUnits": "A 75",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.130,
+        "upperBound": 0.135,
+        "formatUnits": "A 74",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.135,
+        "upperBound": 0.140,
+        "formatUnits": "A 73",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.140,
+        "upperBound": 0.145,
+        "formatUnits": "A 72",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.145,
+        "upperBound": 0.150,
+        "formatUnits": "A 71",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.150,
+        "upperBound": 0.155,
+        "formatUnits": "A 70",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.155,
+        "upperBound": 0.160,
+        "formatUnits": "A 69",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.160,
+        "upperBound": 0.165,
+        "formatUnits": "A 68",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.165,
+        "upperBound": 0.170,
+        "formatUnits": "A 67",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.170,
+        "upperBound": 0.175,
+        "formatUnits": "A 66",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.175,
+        "upperBound": 0.180,
+        "formatUnits": "A 65",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.180,
+        "upperBound": 0.185,
+        "formatUnits": "A 64",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.185,
+        "upperBound": 0.190,
+        "formatUnits": "A 63",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.190,
+        "upperBound": 0.195,
+        "formatUnits": "A 62",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.195,
+        "upperBound": 0.200,
+        "formatUnits": "A 61",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.200,
+        "upperBound": 0.205,
+        "formatUnits": "A 60",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.205,
+        "upperBound": 0.210,
+        "formatUnits": "A 59",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.210,
+        "upperBound": 0.215,
+        "formatUnits": "A 58",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.215,
+        "upperBound": 0.220,
+        "formatUnits": "A 57",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.220,
+        "upperBound": 0.225,
+        "formatUnits": "A 56",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.225,
+        "upperBound": 0.230,
+        "formatUnits": "A 55",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.230,
+        "upperBound": 0.235,
+        "formatUnits": "A 54",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.235,
+        "upperBound": 0.240,
+        "formatUnits": "A 53",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.240,
+        "upperBound": 0.245,
+        "formatUnits": "A 52",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.245,
+        "upperBound": 0.250,
+        "formatUnits": "A 51",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.250,
+        "upperBound": 0.255,
+        "formatUnits": "A 50",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.255,
+        "upperBound": 0.260,
+        "formatUnits": "A 49",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.260,
+        "upperBound": 0.265,
+        "formatUnits": "A 48",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.265,
+        "upperBound": 0.270,
+        "formatUnits": "A 47",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.270,
+        "upperBound": 0.275,
+        "formatUnits": "A 46",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.275,
+        "upperBound": 0.280,
+        "formatUnits": "A 45",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.280,
+        "upperBound": 0.285,
+        "formatUnits": "A 44",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.285,
+        "upperBound": 0.290,
+        "formatUnits": "A 43",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.290,
+        "upperBound": 0.295,
+        "formatUnits": "A 42",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.295,
+        "upperBound": 0.300,
+        "formatUnits": "A 41",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.300,
+        "upperBound": 0.305,
+        "formatUnits": "A 40",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.305,
+        "upperBound": 0.310,
+        "formatUnits": "A 39",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.310,
+        "upperBound": 0.315,
+        "formatUnits": "A 38",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.315,
+        "upperBound": 0.320,
+        "formatUnits": "A 37",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.320,
+        "upperBound": 0.325,
+        "formatUnits": "A 36",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.325,
+        "upperBound": 0.330,
+        "formatUnits": "A 35",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.330,
+        "upperBound": 0.335,
+        "formatUnits": "A 34",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.335,
+        "upperBound": 0.340,
+        "formatUnits": "A 33",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.340,
+        "upperBound": 0.345,
+        "formatUnits": "A 32",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.345,
+        "upperBound": 0.350,
+        "formatUnits": "A 31",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.350,
+        "upperBound": 0.355,
+        "formatUnits": "A 30",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.355,
+        "upperBound": 0.360,
+        "formatUnits": "A 29",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.360,
+        "upperBound": 0.365,
+        "formatUnits": "A 28",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.365,
+        "upperBound": 0.370,
+        "formatUnits": "A 27",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.370,
+        "upperBound": 0.375,
+        "formatUnits": "A 26",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.375,
+        "upperBound": 0.380,
+        "formatUnits": "A 25",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.380,
+        "upperBound": 0.385,
+        "formatUnits": "A 24",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.385,
+        "upperBound": 0.390,
+        "formatUnits": "A 23",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.390,
+        "upperBound": 0.395,
+        "formatUnits": "A 22",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.395,
+        "upperBound": 0.400,
+        "formatUnits": "A 21",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.400,
+        "upperBound": 0.405,
+        "formatUnits": "A 20",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.405,
+        "upperBound": 0.410,
+        "formatUnits": "A 19",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.410,
+        "upperBound": 0.415,
+        "formatUnits": "A 18",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.415,
+        "upperBound": 0.420,
+        "formatUnits": "A 17",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.420,
+        "upperBound": 0.425,
+        "formatUnits": "A 16",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.425,
+        "upperBound": 0.430,
+        "formatUnits": "A 15",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.430,
+        "upperBound": 0.435,
+        "formatUnits": "A 14",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.435,
+        "upperBound": 0.440,
+        "formatUnits": "A 13",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.440,
+        "upperBound": 0.445,
+        "formatUnits": "A 12",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.445,
+        "upperBound": 0.450,
+        "formatUnits": "A 11",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.450,
+        "upperBound": 0.455,
+        "formatUnits": "A 10",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.455,
+        "upperBound": 0.460,
+        "formatUnits": "A 9",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.460,
+        "upperBound": 0.465,
+        "formatUnits": "A 8",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.465,
+        "upperBound": 0.470,
+        "formatUnits": "A 7",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.470,
+        "upperBound": 0.475,
+        "formatUnits": "A 6",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.475,
+        "upperBound": 0.480,
+        "formatUnits": "A 5",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.480,
+        "upperBound": 0.485,
+        "formatUnits": "A 4",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.485,
+        "upperBound": 0.490,
+        "formatUnits": "A 3",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.490,
+        "upperBound": 0.495,
+        "formatUnits": "A 2",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.495,
+        "upperBound": 0.500,
+        "formatUnits": "A 1",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.500,
+        "upperBound": 0.505,
+        "formatUnits": "Even",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.505,
+        "upperBound": 0.510,
+        "formatUnits": "B 1",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.510,
+        "upperBound": 0.515,
+        "formatUnits": "B 2",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.515,
+        "upperBound": 0.520,
+        "formatUnits": "B 3",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.520,
+        "upperBound": 0.525,
+        "formatUnits": "B 4",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.525,
+        "upperBound": 0.530,
+        "formatUnits": "B 5",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.530,
+        "upperBound": 0.535,
+        "formatUnits": "B 6",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.535,
+        "upperBound": 0.540,
+        "formatUnits": "B 7",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.540,
+        "upperBound": 0.545,
+        "formatUnits": "B 8",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.545,
+        "upperBound": 0.550,
+        "formatUnits": "B 9",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.550,
+        "upperBound": 0.555,
+        "formatUnits": "B 10",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.555,
+        "upperBound": 0.560,
+        "formatUnits": "B 11",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.560,
+        "upperBound": 0.565,
+        "formatUnits": "B 12",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.565,
+        "upperBound": 0.570,
+        "formatUnits": "B 13",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.570,
+        "upperBound": 0.575,
+        "formatUnits": "B 14",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.575,
+        "upperBound": 0.580,
+        "formatUnits": "B 15",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.580,
+        "upperBound": 0.585,
+        "formatUnits": "B 16",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.585,
+        "upperBound": 0.590,
+        "formatUnits": "B 17",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.590,
+        "upperBound": 0.595,
+        "formatUnits": "B 18",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.595,
+        "upperBound": 0.600,
+        "formatUnits": "B 19",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.600,
+        "upperBound": 0.605,
+        "formatUnits": "B 20",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.605,
+        "upperBound": 0.610,
+        "formatUnits": "B 21",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.610,
+        "upperBound": 0.615,
+        "formatUnits": "B 22",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.615,
+        "upperBound": 0.620,
+        "formatUnits": "B 23",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.620,
+        "upperBound": 0.625,
+        "formatUnits": "B 24",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.625,
+        "upperBound": 0.630,
+        "formatUnits": "B 25",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.630,
+        "upperBound": 0.635,
+        "formatUnits": "B 26",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.635,
+        "upperBound": 0.640,
+        "formatUnits": "B 27",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.640,
+        "upperBound": 0.645,
+        "formatUnits": "B 28",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.645,
+        "upperBound": 0.650,
+        "formatUnits": "B 29",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.650,
+        "upperBound": 0.655,
+        "formatUnits": "B 30",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.655,
+        "upperBound": 0.660,
+        "formatUnits": "B 31",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.660,
+        "upperBound": 0.665,
+        "formatUnits": "B 32",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.665,
+        "upperBound": 0.670,
+        "formatUnits": "B 33",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.670,
+        "upperBound": 0.675,
+        "formatUnits": "B 34",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.675,
+        "upperBound": 0.680,
+        "formatUnits": "B 35",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.680,
+        "upperBound": 0.685,
+        "formatUnits": "B 36",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.685,
+        "upperBound": 0.690,
+        "formatUnits": "B 37",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.690,
+        "upperBound": 0.695,
+        "formatUnits": "B 38",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.695,
+        "upperBound": 0.700,
+        "formatUnits": "B 39",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.700,
+        "upperBound": 0.705,
+        "formatUnits": "B 40",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.705,
+        "upperBound": 0.710,
+        "formatUnits": "B 41",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.710,
+        "upperBound": 0.715,
+        "formatUnits": "B 42",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.715,
+        "upperBound": 0.720,
+        "formatUnits": "B 43",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.720,
+        "upperBound": 0.725,
+        "formatUnits": "B 44",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.725,
+        "upperBound": 0.730,
+        "formatUnits": "B 45",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.730,
+        "upperBound": 0.735,
+        "formatUnits": "B 46",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.735,
+        "upperBound": 0.740,
+        "formatUnits": "B 47",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.740,
+        "upperBound": 0.745,
+        "formatUnits": "B 48",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.745,
+        "upperBound": 0.750,
+        "formatUnits": "B 49",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.750,
+        "upperBound": 0.755,
+        "formatUnits": "B 50",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.755,
+        "upperBound": 0.760,
+        "formatUnits": "B 51",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.760,
+        "upperBound": 0.765,
+        "formatUnits": "B 52",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.765,
+        "upperBound": 0.770,
+        "formatUnits": "B 53",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.770,
+        "upperBound": 0.775,
+        "formatUnits": "B 54",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.775,
+        "upperBound": 0.780,
+        "formatUnits": "B 55",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.780,
+        "upperBound": 0.785,
+        "formatUnits": "B 56",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.785,
+        "upperBound": 0.790,
+        "formatUnits": "B 57",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.790,
+        "upperBound": 0.795,
+        "formatUnits": "B 58",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.795,
+        "upperBound": 0.800,
+        "formatUnits": "B 59",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.800,
+        "upperBound": 0.805,
+        "formatUnits": "B 60",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.805,
+        "upperBound": 0.810,
+        "formatUnits": "B 61",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.810,
+        "upperBound": 0.815,
+        "formatUnits": "B 62",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.815,
+        "upperBound": 0.820,
+        "formatUnits": "B 63",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.820,
+        "upperBound": 0.825,
+        "formatUnits": "B 64",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.825,
+        "upperBound": 0.830,
+        "formatUnits": "B 65",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.830,
+        "upperBound": 0.835,
+        "formatUnits": "B 66",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.835,
+        "upperBound": 0.840,
+        "formatUnits": "B 67",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.840,
+        "upperBound": 0.845,
+        "formatUnits": "B 68",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.845,
+        "upperBound": 0.850,
+        "formatUnits": "B 69",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.850,
+        "upperBound": 0.855,
+        "formatUnits": "B 70",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.855,
+        "upperBound": 0.860,
+        "formatUnits": "B 71",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.860,
+        "upperBound": 0.865,
+        "formatUnits": "B 72",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.865,
+        "upperBound": 0.870,
+        "formatUnits": "B 73",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.870,
+        "upperBound": 0.875,
+        "formatUnits": "B 74",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.875,
+        "upperBound": 0.880,
+        "formatUnits": "B 75",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.880,
+        "upperBound": 0.885,
+        "formatUnits": "B 76",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.885,
+        "upperBound": 0.890,
+        "formatUnits": "B 77",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.890,
+        "upperBound": 0.895,
+        "formatUnits": "B 78",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.895,
+        "upperBound": 0.900,
+        "formatUnits": "B 79",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.900,
+        "upperBound": 0.905,
+        "formatUnits": "B 80",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.905,
+        "upperBound": 0.910,
+        "formatUnits": "B 81",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.910,
+        "upperBound": 0.915,
+        "formatUnits": "B 82",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.915,
+        "upperBound": 0.920,
+        "formatUnits": "B 83",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.920,
+        "upperBound": 0.925,
+        "formatUnits": "B 84",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.925,
+        "upperBound": 0.930,
+        "formatUnits": "B 85",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.930,
+        "upperBound": 0.935,
+        "formatUnits": "B 86",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.935,
+        "upperBound": 0.940,
+        "formatUnits": "B 87",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.940,
+        "upperBound": 0.945,
+        "formatUnits": "B 88",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.945,
+        "upperBound": 0.950,
+        "formatUnits": "B 89",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.950,
+        "upperBound": 0.955,
+        "formatUnits": "B 90",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.955,
+        "upperBound": 0.960,
+        "formatUnits": "B 91",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.960,
+        "upperBound": 0.965,
+        "formatUnits": "B 92",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.965,
+        "upperBound": 0.970,
+        "formatUnits": "B 93",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.970,
+        "upperBound": 0.975,
+        "formatUnits": "B 94",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.975,
+        "upperBound": 0.980,
+        "formatUnits": "B 95",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.980,
+        "upperBound": 0.985,
+        "formatUnits": "B 96",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.985,
+        "upperBound": 0.990,
+        "formatUnits": "B 97",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.990,
+        "upperBound": 0.995,
+        "formatUnits": "B 98",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 0.995,
+        "upperBound": 1.000,
+        "formatUnits": "B 99",
+        "format": "%.1f"
+      },
+      {
+        "lowerBound": 1.000,
+        "upperBound": 1.005,
+        "formatUnits": "B 100",
+        "format": "%.1f"
+      }
+    ]
+  },
+  "Shimmer_shift_OctaveStepCents": {
+    "dspToDisplayScale": 1,
+    "displayToWidgetScale": 10,
+    "step": [
+      {
+        "lowerBound": -12.0,
+        "upperBound": 12.0,
+        "fine": 0.1,
+        "coarse": 1.0
+      }
+    ],
+    "format": [
+      {
+        "lowerBound": -12.09,
+        "upperBound": -11.999,
+        "format": "%.0f",
+        "formatUnits": "Oct Down"
+      },
+      {
+        "lowerBound": -11.901,
+        "upperBound": -11.001,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": -11.09,
+        "upperBound": -10.999,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": -10.901,
+        "upperBound": -10.001,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": -10.09,
+        "upperBound": -9.999,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": -9.901,
+        "upperBound": -9.001,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": -9.09,
+        "upperBound": -8.999,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": -8.901,
+        "upperBound": -8.001,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": -8.09,
+        "upperBound": -7.999,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": -7.901,
+        "upperBound": -7.001,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": -7.09,
+        "upperBound": -6.999,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": -6.901,
+        "upperBound": -6.001,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": -6.09,
+        "upperBound": -5.999,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": -5.901,
+        "upperBound": -5.001,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": -5.09,
+        "upperBound": -4.999,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": -4.901,
+        "upperBound": -4.001,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": -4.09,
+        "upperBound": -3.999,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": -3.901,
+        "upperBound": -3.001,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": -3.09,
+        "upperBound": -2.999,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": -2.901,
+        "upperBound": -2.001,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": -2.09,
+        "upperBound": -1.999,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": -1.901,
+        "upperBound": -1.001,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": -1.09,
+        "upperBound": -0.999,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": -0.901,
+        "upperBound": -0.099,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": -0.099,
+        "upperBound": 0.099,
+        "format": "%.0f",
+        "formatUnits": "Unison"
+      },
+      {
+        "lowerBound": 0.099,
+        "upperBound": 0.999,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": 0.999,
+        "upperBound": 1.099,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": 1.099,
+        "upperBound": 1.990,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": 1.999,
+        "upperBound": 2.099,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": 2.099,
+        "upperBound": 2.990,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": 2.999,
+        "upperBound": 3.099,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": 3.099,
+        "upperBound": 3.990,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": 3.999,
+        "upperBound": 4.099,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": 4.099,
+        "upperBound": 4.990,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": 4.999,
+        "upperBound": 5.099,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": 5.099,
+        "upperBound": 5.990,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": 5.999,
+        "upperBound": 6.099,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": 6.099,
+        "upperBound": 6.990,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": 6.999,
+        "upperBound": 7.099,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": 7.099,
+        "upperBound": 7.990,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": 7.999,
+        "upperBound": 8.099,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": 8.099,
+        "upperBound": 8.990,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": 8.999,
+        "upperBound": 9.099,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": 9.099,
+        "upperBound": 9.990,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": 9.999,
+        "upperBound": 10.099,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": 10.099,
+        "upperBound": 10.990,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": 10.999,
+        "upperBound": 11.099,
+        "format": "%.0f",
+        "formatUnits": "%+.0f steps"
+      },
+      {
+        "lowerBound": 11.099,
+        "upperBound": 11.990,
+        "unitsMultiplier": 100,
+        "format": "%.0f",
+        "formatUnits": "%+.0f cents"
+      },
+      {
+        "lowerBound": 11.999,
+        "upperBound": 12.099,
+        "format": "%.0f",
+        "formatUnits": "Oct Up"
+      }
+    ]
+  },
+  "Shimmer_shift_OctaveStep": {
+    "dspToDisplayScale": 1,
+    "displayToWidgetScale": 10,
+    "step": [
+      {
+        "lowerBound": -12.0,
+        "upperBound": 1.0,
+        "fine": 1.0,
+        "coarse": 1.0
+      },
+      {
+        "lowerBound": -1.0,
+        "upperBound": 1.0,
+        "fine": 0.1,
+        "coarse": 1.0
+      },
+      {
+        "lowerBound": 1.0,
+        "upperBound": 12.0,
+        "fine": 1.0,
+        "coarse": 1.0
+      }
+    ],
+    "format": [
+      {
+        "lowerBound": -12.09,
+        "upperBound": -11.999,
+        "format": "%.0f",
+        "formatUnits": "Oct Down"
+      },
+      {
+        "lowerBound": -11.999,
+        "upperBound": -0.999,
+        "format": "%.0f",
+        "formatUnits": "%+.0f"
+      },
+      {
+        "lowerBound": -0.999,
+        "upperBound": -0.099,
+        "format": "%.1f",
+        "formatUnits": "%+.1f"
+      },
+      {
+        "lowerBound": -0.099,
+        "upperBound": 0.099,
+        "format": "%.1f",
+        "formatUnits": "Unison"
+      },
+      {
+        "lowerBound": 0.099,
+        "upperBound": 1.0,
+        "format": "%.1f",
+        "formatUnits": "%+.1f"
+      },
+      {
+        "lowerBound": 1.0,
+        "upperBound": 11.999,
+        "format": "%.0f",
+        "formatUnits": "%+.0f"
+      },
+      {
+        "lowerBound": 11.999,
+        "upperBound": 12.099,
+        "format": "%.0f",
+        "formatUnits": "Oct Up"
+      }
+    ]
+  },
+  "reel_inchespresec": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "7.5 ips",
+      "15 ips",
+      "30 ips"
+    ]
+  },
+  "room_size": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "10 m",
+      "20 m",
+      "30 m"
+    ]
+  },
+  "split_ab_route_to": {
+    "minimumValue": -100.0,
+    "maximumValue": 100.0,
+    "format": [
+      {
+        "lowerBound": -100,
+        "upperBound": -0.5,
+        "unitsMultiplier": -1,
+        "format": "%.0f",
+        "formatUnits": "A %.0f"
+      },
+      {
+        "lowerBound": -0.5,
+        "upperBound": 0.5,
+        "format": "%.0f",
+        "formatUnits": "Even Split"
+      },
+      {
+        "lowerBound": 0.5,
+        "upperBound": 100.1,
+        "format": "%.0f",
+        "formatUnits": "B %.0f"
+      }
+    ],
+    "step": {
+      "fine": 1.0,
+      "coarse": 10.0
+    }
+  },
+  "tenths_no_units": {
+    "dspToDisplayScale": 1,
+    "displayToWidgetScale": 10,
+    "format": "%.1f",
+    "step": {
+      "fine": 0.1,
+      "coarse": 1.0
+    }
+  },
+  "time_sec": {
+    "dspToDisplayScale": 1,
+    "displayToWidgetScale": 10,
+    "format": "%.1f sec",
+    "step": {
+      "fine": 0.1,
+      "coarse": 1.0
+    }
+  },
+  "time_sec_DynamicHall": {
+    "dspToDisplayScale": 1,
+    "displayToWidgetScale": 10,
+    "step": [
+      {
+        "lowerBound": 0.1,
+        "upperBound": 45.1,
+        "fine": 0.1,
+        "coarse": 1.0
+      }
+    ],
+    "format": [
+      {
+        "lowerBound": 0.1,
+        "upperBound": 45.09,
+        "format": "%.1f",
+        "formatUnits": "%.1f sec"
+      },
+      {
+        "lowerBound": 45.1,
+        "upperBound": 45.19,
+        "formatUnits": "Infinity"
+      }
+    ]
+  },
+  "tilt": {
+    "minimumValue": -100.0,
+    "maximumValue": 100.0,
+    "format": [
+      {
+        "lowerBound": -100.0,
+        "upperBound": -0.5,
+        "format": "%.0f",
+        "formatUnits": "Dark %.0f",
+        "unitsMultiplier": -1
+      },
+      {
+        "lowerBound": -0.5,
+        "upperBound": 0.5,
+        "format": "%.0f",
+        "formatUnits": "Flat"
+      },
+      {
+        "lowerBound": 0.5,
+        "upperBound": 100.1,
+        "format": "%.0f",
+        "formatUnits": "Bright %.0f"
+      }
+    ],
+    "step": {
+      "fine": 1,
+      "coarse": 10
+    }
+  },
+  "time_ms": {
+    "canDisplayHigherRes": true,
+    "dspToDisplayScale": 1000.0,
+    "displayToWidgetScale": 10,
+    "step": [
+      {
+        "lowerBound": 0.0,
+        "upperBound": 1.0,
+        "fine": 0.1,
+        "coarse": 1
+      },
+      {
+        "lowerBound": 1.0,
+        "upperBound": 99999.0,
+        "fine": 1,
+        "coarse": 10
+      }
+    ],
+    "format": [
+      {
+        "lowerBound": 0.0,
+        "upperBound": 9.999,
+        "format": "%.1f",
+        "formatUnits": "%.1f ms"
+      },
+      {
+        "lowerBound": 9.999,
+        "upperBound": 1000.0,
+        "format": "%.0f",
+        "formatUnits": "%.0f ms"
+      },
+      {
+        "lowerBound": 1000,
+        "upperBound": 99999.0,
+        "unitsMultiplier": 0.001,
+        "format": "%.0f",
+        "formatUnits": "%.3f s"
+      }
+    ]
+  },
+  "tubepre_high_cut": {
+    "canDisplayHigherRes": true,
+    "displayToWidgetScale": 10,
+    "step": [
+      {
+        "lowerBound": 0.0,
+        "upperBound": 20.0,
+        "fine": 0.1,
+        "coarse": 1
+      },
+      {
+        "lowerBound": 20.0,
+        "upperBound": 100.0,
+        "fine": 1,
+        "coarse": 10
+      },
+      {
+        "lowerBound": 100.0,
+        "upperBound": 1000.0,
+        "fine": 10,
+        "coarse": 100
+      },
+      {
+        "lowerBound": 1000.0,
+        "upperBound": 99999.0,
+        "fine": 100,
+        "coarse": 1000
+      }
+    ],
+    "format": [
+      {
+        "lowerBound": 0.0,
+        "upperBound": 1000.0,
+        "format": "%.0f",
+        "formatUnits": "%.0f Hz"
+      },
+      {
+        "lowerBound": 1000.0,
+        "upperBound": 20000.0,
+        "unitsMultiplier": 0.001,
+        "format": "%.0f",
+        "formatUnits": "%.1f kHz"
+      },
+      {
+        "lowerBound": 20000.0,
+        "upperBound": 99999.0,
+        "format": "Off"
+      }
+    ]
+  },
+  "tubepre_low_cut": {
+    "canDisplayHigherRes": true,
+    "displayToWidgetScale": 10,
+    "step": [
+      {
+        "lowerBound": 10.0,
+        "upperBound": 20.0,
+        "fine": 0.1,
+        "coarse": 1
+      },
+      {
+        "lowerBound": 20.0,
+        "upperBound": 100.0,
+        "fine": 1,
+        "coarse": 10
+      },
+      {
+        "lowerBound": 100.0,
+        "upperBound": 1000.0,
+        "fine": 10,
+        "coarse": 100
+      },
+      {
+        "lowerBound": 1000.0,
+        "upperBound": 99999.0,
+        "fine": 100,
+        "coarse": 1000
+      }
+    ],
+    "format": [
+      {
+        "lowerBound": 0.0,
+        "upperBound": 10.1,
+        "format": "Off",
+        "formatUnits": "Off"
+      },
+      {
+        "lowerBound": 10.1,
+        "upperBound": 20.0,
+        "format": "%.1f",
+        "formatUnits": "%.1f Hz"
+      },
+      {
+        "lowerBound": 20.0,
+        "upperBound": 1000.0,
+        "format": "%.0f",
+        "formatUnits": "%.0f Hz"
+      },
+      {
+        "lowerBound": 1000.0,
+        "upperBound": 99999.0,
+        "unitsMultiplier": 0.001,
+        "format": "%.0f",
+        "formatUnits": "%.1f kHz"
+      }
+    ]
+  },
+  "volume": {
+    "displayToWidgetScale": 10,
+    "format": "%+.1f",
+    "formatUnits": "%+.1f dB",
+    "step": [
+      {
+        "lowerBound": -120.0,
+        "upperBound": -30.0,
+        "fine": 1.0,
+        "coarse": 10.0
+      },
+      {
+        "lowerBound": -30.0,
+        "upperBound": -20.0,
+        "fine": 0.5,
+        "coarse": 5
+      },
+      {
+        "lowerBound": -20.0,
+        "upperBound": -6.0,
+        "fine": 0.2,
+        "coarse": 2
+      },
+      {
+        "lowerBound": -6.0,
+        "upperBound": 6.0,
+        "fine": 0.1,
+        "coarse": 1
+      },
+      {
+        "lowerBound": 6.0,
+        "upperBound": 20.0,
+        "fine": 0.2,
+        "coarse": 2
+      },
+      {
+        "lowerBound": 20.0,
+        "upperBound": 30.0,
+        "fine": 0.5,
+        "coarse": 5
+      },
+      {
+        "lowerBound": 30.0,
+        "upperBound": 120.0,
+        "fine": 1.0,
+        "coarse": 10.0
+      }
+    ]
+  },
+  "volume_GEQ": {
+    "displayToWidgetScale": 10,
+    "format": "%+.1f",
+    "formatUnits": "%+.1f dB",
+    "step": [
+      {
+        "lowerBound": -120.0,
+        "upperBound": -30.0,
+        "fine": 1.0,
+        "coarse": 10.0
+      },
+      {
+        "lowerBound": -30.0,
+        "upperBound": -20.0,
+        "fine": 0.5,
+        "coarse": 5
+      },
+      {
+        "lowerBound": -20.0,
+        "upperBound": -6.0,
+        "fine": 0.2,
+        "coarse": 2
+      },
+      {
+        "lowerBound": -6.0,
+        "upperBound": 6.0,
+        "fine": 0.1,
+        "coarse": 1
+      },
+      {
+        "lowerBound": 6.0,
+        "upperBound": 20.0,
+        "fine": 0.2,
+        "coarse": 2
+      },
+      {
+        "lowerBound": 20.0,
+        "upperBound": 30.0,
+        "fine": 0.5,
+        "coarse": 5
+      },
+      {
+        "lowerBound": 30.0,
+        "upperBound": 120.0,
+        "fine": 1.0,
+        "coarse": 10.0
+      }
+    ]
+  },
+
+
+
+  "adt_threshold": {
+    "dspToDisplayScale": 10,
+    "displayToWidgetScale": 10,
+    "step": {
+      "fine": 0.1,
+      "coarse": 1.0
+    },
+    "format": [
+      {
+        "lowerBound": 0.0,
+        "upperBound": 0.01,
+        "format": "Off"
+      },
+      {
+        "lowerBound": 0.01,
+        "upperBound": 10.1,
+        "format": "%.1f"
+      }
+    ]
+  },
+  "amp_boost": {
+    "dspToDisplayScale": 10,
+    "displayToWidgetScale": 10,
+    "step": {
+      "fine": 0.1,
+      "coarse": 1.0
+    },
+    "format": [
+      {
+        "lowerBound": 0.0,
+        "upperBound": 0.09,
+        "format": "Off",
+        "formatUnits": "Off"
+      },
+      {
+        "lowerBound": 0.09,
+        "upperBound": 10.1,
+        "format": "%.1f"
+      }
+    ]
+  },
+  "amp_midfreq": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "220 Hz",
+      "800 Hz",
+      "3000 Hz"
+    ]
+  },
+  "amp_midfreq": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "220 Hz",
+      "800 Hz",
+      "3000 Hz"
+    ]
+  },
+  "amp_voice": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ]
+  },
+  "ashville_direction": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Forward",
+      "Reverse"
+    ]
+  },
+  "ashville_pattern": {
+    "isDiscrete": true,
+    "format": [
+      "Off",
+      "Stair",
+      "Cascade",
+      "Cross",
+      "Brownian",
+      "Random",
+      "Band Expansion",
+      "Down/Up",
+      "Pulsar",
+      "Grow/Shrink",
+      "Double Cascade",
+      "Rhythmicon",
+      "Double X",
+      "Perpetual",
+      "Pyramid",
+      "Double Dip",
+      "Inverted",
+      "Prime",
+      "Folded",
+      "Breakbeat",
+      "Big Beat"
+    ]
+  },
+  "ashville_voice": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Bass",
+      "Mid"
+    ]
+  },
+  "attack": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Cut",
+      "Flat",
+      "Boost"
+    ]
+  },
+  "auto": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ]
+  },
+  "bbd_size": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "1024",
+      "2048",
+      "4096",
+      "8192"
+    ]
+  },
+  "bright": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Off",
+      "1",
+      "2"
+    ]
+  },
+  "cabMICir": {
+    "isDiscrete": true,
+    "format": [
+      "57 Dynamic",
+      "421 Dynamic",
+      "7 Dynamic",
+      "906 Dynamic",
+      "30 Dynamic",
+      "121 Ribbon",
+      "160 Ribbon",
+      "4038 Ribbon",
+      "84 Ribbon",
+      "414 Cond",
+      "47 Cond FET",
+      "67 Cond"
+    ]
+  },
+  "cabMICirBass": {
+    "isDiscrete": true,
+    "format": [
+      "57 Dynamic",
+      "421 Dynamic",
+      "7 Dynamic",
+      "88 Dynamic",
+      "52 Dynamic",
+      "112 Dynamic",
+      "D6 Dynamic",
+      "40 Dynamic",
+      "4038 Ribbon",
+      "414 Cond",
+      "47 Cond FET",
+      "67 Cond"
+    ]
+  },
+  "chorus_mode": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Chorus",
+      "Vibrato"
+    ]
+  },
+  "clipping": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Up",
+      "Center",
+      "Down"
+    ]
+  },
+  "clipping_dist": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Overdrive",
+      "Boost",
+      "Distortion"
+    ]
+  },
+  "clipping_dist_xenofuzz": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Soft",
+      "Hard"
+    ]
+  },
+  "clipping_sym": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Symmetric",
+      "Asymmetric"
+    ]
+  },
+  "comp_mode": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Compress",
+      "Limit"
+    ]
+  },
+  "comp_ratio": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "2:1",
+      "3:1",
+      "4:1",
+      "6:1",
+      "10:1",
+      "20:1"
+    ]
+  },
+  "comp_ratio_3band": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "2:1",
+      "3:1",
+      "4:1",
+      "6:1",
+      "8:1",
+      "12:1",
+      "20:1"
+    ]
+  },
+  "condition": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Stable",
+      "Critical",
+      "Hazard"
+    ]
+  },
+  "control_select": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "LFO",
+      "Envelope",
+      "Manual"
+    ]
+  },
+  "crisscross_wave_shape": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Sine",
+      "Triangle"
+    ]
+  },
+  "crisscross_bitdepth": {
+    "isDiscrete": true,
+    "format": [
+      "6 Bits",
+      "8 Bits",
+      "10 Bits",
+      "11 Bits",
+      "12 Bits",
+      "14 Bits",
+      "16 Bits",
+      "24 Bits"
+    ]
+  },
+  "cv_delay": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "x1",
+      "x2",
+      "x4"
+    ]
+  },
+  "cv_polarity": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Normal",
+      "Invert"
+    ]
+  },
+  "delay_bit_depth": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "6",
+      "8",
+      "10",
+      "11",
+      "12",
+      "14",
+      "16",
+      "24"
+    ]
+  },
+  "delay_heads": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "1 - -",
+      "- 2 -",
+      "- - 3",
+      "1 - 3",
+      "- 2 3",
+      "1 2 3"
+    ]
+  },
+  "delay_mod_mode": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Off",
+      "Chorus",
+      "Vibrato"
+    ]
+  },
+  "delay_mode": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Delay",
+      "Echo"
+    ]
+  },
+  "delay_source": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Mono",
+      "Stereo",
+      "Left",
+      "Right"
+    ]
+  },
+  "detector": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Separate",
+      "Link"
+    ]
+  },
+  "diode": {
+    "isDiscrete": true,
+    "format": [
+      "None",
+      "Germanium",
+      "Silicon",
+      "LED"
+    ]
+  },
+  "dist_version": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "V2",
+      "V4"
+    ]
+  },
+  "down_up": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Down",
+      "Up"
+    ]
+  },
+  "dyn_type": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Ducking",
+      "Gating"
+    ]
+  },
+  "dynamicAmbience_room_size": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "8 m",
+      "10 m",
+      "12 m"
+    ]
+  },
+  "ef_mode": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Envelope",
+      "ADSR"
+    ]
+  },
+  "even_odd": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Even",
+      "Odd"
+    ]
+  },
+  "fast_slow": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Slow",
+      "Fast"
+    ]
+  },
+  "filter_pattern": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "One",
+      "Two",
+      "Three",
+      "Four"
+    ]
+  },
+  "filter_range": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Low",
+      "High"
+    ]
+  },
+  "gain_mod": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Normal",
+      "Higher"
+    ]
+  },
+  "GSG_Jazz_Rock": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Jazz",
+      "Rock"
+    ]
+  },
+  "GSG_Bright": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Off",
+      "Bright 1",
+      "Bright 2"
+    ]
+  },
+  "GermanXtra_Bright": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Off",
+      "B1",
+      "B2"
+    ]
+  },
+  "GermanXtra_Style": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Triode",
+      "Pentode"
+    ]
+  },
+  "GermanXtra_Class": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "A",
+      "AB"
+    ]
+  },
+  "heads12": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "1-2 Off",
+      "HD1 On",
+      "1-2 On",
+      "HD2 On"
+    ]
+  },
+  "heads34": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "3-4 Off",
+      "HD3 On",
+      "3-4 On",
+      "HD4 On"
+    ]
+  },
+  "hi_mid_freq": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "750 Hz",
+      "1.5 kHz",
+      "3 kHz"
+    ]
+  },
+  "horizon_attack": {
+    "isDiscrete": true,
+    "format": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ]
+  },
+  "horizon_gaterange": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Authentic",
+      "Extended"
+    ]
+  },
+  "horizon_gatemode": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Bass",
+      "Guitar"
+    ]
+  },
+  "input_pad": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "-10 dB",
+      "0 dB",
+      "10 dB"
+    ]
+  },
+  "integer_slider": {
+    "isDiscrete": true,
+    "controlType": "slider"
+  },
+  "integer_slider_seg": {
+    "isDiscrete": true,
+    "controlType": "segmented"
+  },
+  "integer_slider_1based": {
+    "isDiscrete": true,
+    "dspToDisplayIntegerOffset": 1
+  },
+  "integer_slider_signed": {
+    "isDiscrete": true,
+    "format": "%+d"
+  },
+  "integer_steps": {
+    "isDiscrete": true,
+    "controlType": "slider",
+    "format": "%d Steps"
+  },
+  "ir_select": {
+    "isDiscrete": true,
+    "format": [
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-"
+    ]
+  },
+  "key_voice": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "A",
+      "A#",
+      "B",
+      "C",
+      "C#",
+      "D",
+      "D#",
+      "E",
+      "F",
+      "F#",
+      "G",
+      "G#"
+    ]
+  },
+  "lo_med_high": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Low",
+      "Medium",
+      "High"
+    ]
+  },
+  "lo_mid_freq": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "250 Hz",
+      "500 Hz",
+      "1 kHz"
+    ]
+  },
+  "low_peak_high_peak": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Low",
+      "High"
+    ]
+  },
+  "lfo_shape": {
+    "isDiscrete": true,
+    "format": [
+      "Saw Up",
+      "Saw Down",
+      "Triangle",
+      "Sine",
+      "Square",
+      "Exp Sine"
+    ]
+  },
+  "lfo_shape_dualphaser": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Sine",
+      "Square"
+    ]
+  },
+  "mic": {
+    "isDiscrete": true,
+    "format": [
+      "57 Dynamic",
+      "409 Dynamic",
+      "421 Dynamic",
+      "30 Dynamic",
+      "20 Dynamic",
+      "121 Ribbon",
+      "160 Ribbon",
+      "4038 Ribbon",
+      "414 Cond",
+      "84 Cond",
+      "67 Cond",
+      "87 Cond",
+      "47 Cond",
+      "112 Dynamic",
+      "12 Dynamic",
+      "7 Dynamic"
+    ]
+  },
+  "mode_pass": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Low Pass",
+      "Band Pass",
+      "High Pass"
+    ]
+  },
+  "note_pitch": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "C",
+      "C#",
+      "D",
+      "D#",
+      "E",
+      "F",
+      "F#",
+      "G",
+      "G#",
+      "A",
+      "A#",
+      "B"
+    ]
+  },
+  "note_slider": {
+    "format": [
+      "note-32nd",
+      "note-16th-3",
+      "note-16th",
+      "note-16th-dot",
+      "note-8th-3",
+      "note-8th",
+      "note-8th-dot",
+      "note-qtr-3",
+      "note-qtr",
+      "note-qtr-dot",
+      "note-half-3",
+      "note-half",
+      "note-half-dot",
+      "note-whole"
+    ]
+  },
+  "odd_even": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Odd",
+      "Even"
+    ]
+  },
+  "lo_high": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Low",
+      "High"
+    ]
+  },
+  "off_on": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Off",
+      "On"
+    ]
+  },
+  "OFF_ON": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "OFF",
+      "ON"
+    ]
+  },
+  "out_in": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Out",
+      "In"
+    ]
+  },
+  "single_dual": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Single",
+      "Dual"
+    ]
+  },
+  "output_type": {
+    "isDiscrete": true,
+    "allowDiscreteStates": true,
+    "format": [
+      "Main Out"
+    ]
+  },
+  "pan_discrete": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Left",
+      "Center",
+      "Right"
+    ]
+  },
+  "phase": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "0",
+      "90",
+      "180"
+    ]
+  },
+  "pattern_trem_step": {
+    "isDiscrete": true,
+    "format": [
+      {
+        "lowerBound": 0,
+        "upperBound": 1,
+        "format": "Mute"
+      },
+      {
+        "lowerBound": 1,
+        "upperBound": 17,
+        "format": "%d"
+      },
+      {
+        "lowerBound": 17,
+        "upperBound": 999999,
+        "format": "Full"
+      }
+    ]
+  },
+  "percent_discrete": {
+    "isDiscrete": true,
+    "dspToDisplayScale": 100,
+    "format": "%d",
+    "formatUnits": "%d %%"
+  },
+  "pitch_shift": {
+    "isDiscrete": true,
+    "format": [ "-9th", "-8th", "-7th", "-6th", "-5th", "-4th", "-3rd", "-2nd", "0", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th" ]
+  },
+  "poly_acoustic_sim": {
+    "isDiscrete": true,
+    "format": [
+      "Standard",
+      "Jumbo",
+      "Enhanced",
+      "Piezo"
+    ]
+  },
+  "polarity": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Normal",
+      "Inverted"
+    ]
+  },
+  "preamp_sensitivity": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Mic",
+      "Line"
+    ]
+  },
+  "ramp_time": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Slow",
+      "Medium",
+      "Fast"
+    ]
+  },
+  "sample_rate": {
+    "isDiscrete": true,
+    "controlType": "slider",
+    "format": [
+      "8 kHz",
+      "11.025 kHz",
+      "12 kHz",
+      "16 kHz",
+      "22.05 kHz",
+      "24 kHz",
+      "44.1 kHz",
+      "48 kHz"
+    ]
+  },
+  "scale_voice": {
+    "isDiscrete": true,
+    "controlType": "slider",
+    "format": [
+      "Major",
+      "Minor",
+      "Major Pentatonic",
+      "Minor Pentatonic",
+      "Harmonic Minor",
+      "Melodic Minor",
+      "Whole Tone",
+      "Whole Diminished"
+    ]
+  },
+  "shift_mode": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Up",
+      "Down",
+      "Stereo"
+    ]
+  },
+  "stage": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "4",
+      "8",
+      "12",
+      "16"
+    ]
+  },
+  "stereo_classic": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "True",
+      "Classic"
+    ]
+  },
+  "stereo_mode": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Mono",
+      "Stereo"
+    ]
+  },
+  "stutterEdit_Mode": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Speed",
+      "Pitch"
+    ]
+  },
+  "stutterEdit_Operation": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "MuteAll",
+      "DryKll",
+      "Normal"
+    ]
+  },
+  "stutterEdit_Reverse": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Forward",
+      "Reverse",
+      "Fwd/Rev"
+    ]
+  },
+  "sweep_shape": {
+    "isDiscrete": true,
+    "format": [
+      "Triangle",
+      "Sine",
+      "Square",
+      "Inv Sine",
+      "Exp Sine",
+      "Random"
+    ]
+  },
+  "sync_note": {
+    "isDiscrete": true,
+    "format": [
+      "1/1",
+      "1/2 Dotted",
+      "1/2",
+      "1/2 Triplet",
+      "1/4 Dotted",
+      "1/4",
+      "1/4 Triplet",
+      "1/8 Dotted",
+      "1/8",
+      "1/8 Triplet",
+      "1/16 Dotted",
+      "1/16",
+      "1/16 Triplet",
+      "1/32 Dotted",
+      "1/32",
+      "1/32 Triplet",
+      "1/64 Dotted",
+      "1/64",
+      "1/64 Triplet"
+    ]
+  },
+  "synthharmony_interval1": {
+    "isDiscrete": true,
+    "format": [
+      "-Major 6th",
+      "-Minor 6th",
+      "-4th",
+      "Unison",
+      "Minor 3rd",
+      "Major 3rd",
+      "5th",
+      "1 Octave"
+    ]
+  },
+  "synthharmony_interval2": {
+    "isDiscrete": true,
+    "format": [
+      "-1 Octave",
+      "-5th",
+      "-4th",
+      "-Major 2nd",
+      "Unison",
+      "4th",
+      "5th",
+      "Minor 7th",
+      "1 Octave"
+    ]
+  },
+  "Tight_Big": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Tight",
+      "Big"
+    ]
+  },
+  "Tight_Medium_Loose": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Tight",
+      "Medium",
+      "Loose"
+    ]
+  },
+  "time_ms_discrete": {
+    "isDiscrete": true,
+    "dspToDisplayScale": 1000,
+    "format": "%d",
+    "formatUnits": "%d ms"
+  },
+  "tremolo_mode": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Tremolo",
+      "Vibrato"
+    ]
+  },
+  "ts_shape": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Normal",
+      "Thick",
+      "Thicker"
+    ]
+  },
+  "up_down": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Up",
+      "Down"
+    ]
+  },
+  "up_updown": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Up",
+      "Up/Down"
+    ]
+  },
+  "voltage": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "9V",
+      "18V"
+    ]
+  },
+  "volume_curve": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Linear",
+      "Logarithmic"
+    ]
+  },
+  "vowel_start": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "A",
+      "E",
+      "I",
+      "O",
+      "U"
+    ]
+  },
+  "vowel_end": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "A",
+      "E",
+      "I",
+      "O",
+      "U"
+    ]
+  },
+  "wave_buzz": {
+    "isDiscrete": true,
+    "format": [
+      "Wave 1",
+      "Wave 2",
+      "Wave 3",
+      "Wave 4",
+      "Wave 5",
+      "Wave 6",
+      "Wave 7"
+    ]
+  },
+  "wave_rezsynth": {
+    "isDiscrete": true,
+    "format": [
+      "Wave 1",
+      "Wave 2",
+      "Wave 3",
+      "Wave 4",
+      "Wave 5",
+      "Wave 6",
+      "Wave 7",
+      "Wave 8"
+    ]
+  },
+  "wave_shape": {
+    "isDiscrete": true,
+    "controlType": "slider",
+    "format": [
+      "Saw Up",
+      "Saw Down",
+      "Triangle",
+      "Sine",
+      "Square",
+      "Inv Sine",
+      "Random"
+    ]
+  },
+  "wave_shape_panner": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Triangle",
+      "Sine",
+      "Square"
+    ]
+  },
+  "wave_shape_pattern_trem": {
+    "isDiscrete": true,
+    "format": [
+      "Saw Up",
+      "Saw Down",
+      "Triangle",
+      "Sine",
+      "Square"
+    ]
+  },
+  "wave_shape_throbber": {
+    "isDiscrete": true,
+    "format": [
+      "Ramp Up",
+      "Ramp Down",
+      "Triangle",
+      "Square"
+    ]
+  },
+  "wave_synth": {
+    "isDiscrete": true,
+    "controlType": "segmented",
+    "format": [
+      "Square",
+      "PWM",
+      "Ramp"
+    ]
+  },
+  "dynamic_ambience_shape": {
+    "dspToDisplayScale": 1,
+    "displayToWidgetScale": 1000,
+    "format": [
+      {
+        "lowerBound": 0.000,
+        "upperBound": 0.005,
+        "format": "%f",
+        "formatUnits": "Early 100"
+      },
+      {
+        "lowerBound": 0.005,
+        "upperBound": 0.010,
+        "format": "%f",
+        "formatUnits": "Early 99"
+      },
+      {
+        "lowerBound": 0.010,
+        "upperBound": 0.015,
+        "format": "%f",
+        "formatUnits": "Early 98"
+      },
+      {
+        "lowerBound": 0.015,
+        "upperBound": 0.020,
+        "format": "%f",
+        "formatUnits": "Early 97"
+      },
+      {
+        "lowerBound": 0.020,
+        "upperBound": 0.025,
+        "format": "%f",
+        "formatUnits": "Early 96"
+      },
+      {
+        "lowerBound": 0.025,
+        "upperBound": 0.030,
+        "format": "%f",
+        "formatUnits": "Early 95"
+      },
+      {
+        "lowerBound": 0.030,
+        "upperBound": 0.035,
+        "format": "%f",
+        "formatUnits": "Early 94"
+      },
+      {
+        "lowerBound": 0.035,
+        "upperBound": 0.040,
+        "format": "%f",
+        "formatUnits": "Early 93"
+      },
+      {
+        "lowerBound": 0.040,
+        "upperBound": 0.045,
+        "format": "%f",
+        "formatUnits": "Early 92"
+      },
+      {
+        "lowerBound": 0.045,
+        "upperBound": 0.050,
+        "format": "%f",
+        "formatUnits": "Early 91"
+      },
+      {
+        "lowerBound": 0.050,
+        "upperBound": 0.055,
+        "format": "%f",
+        "formatUnits": "Early 90"
+      },
+      {
+        "lowerBound": 0.055,
+        "upperBound": 0.060,
+        "format": "%f",
+        "formatUnits": "Early 89"
+      },
+      {
+        "lowerBound": 0.060,
+        "upperBound": 0.065,
+        "format": "%f",
+        "formatUnits": "Early 88"
+      },
+      {
+        "lowerBound": 0.065,
+        "upperBound": 0.070,
+        "format": "%f",
+        "formatUnits": "Early 87"
+      },
+      {
+        "lowerBound": 0.070,
+        "upperBound": 0.075,
+        "format": "%f",
+        "formatUnits": "Early 86"
+      },
+      {
+        "lowerBound": 0.075,
+        "upperBound": 0.080,
+        "format": "%f",
+        "formatUnits": "Early 85"
+      },
+      {
+        "lowerBound": 0.080,
+        "upperBound": 0.085,
+        "format": "%f",
+        "formatUnits": "Early 84"
+      },
+      {
+        "lowerBound": 0.085,
+        "upperBound": 0.090,
+        "format": "%f",
+        "formatUnits": "Early 83"
+      },
+      {
+        "lowerBound": 0.090,
+        "upperBound": 0.095,
+        "format": "%f",
+        "formatUnits": "Early 82"
+      },
+      {
+        "lowerBound": 0.095,
+        "upperBound": 0.100,
+        "format": "%f",
+        "formatUnits": "Early 81"
+      },
+      {
+        "lowerBound": 0.100,
+        "upperBound": 0.105,
+        "format": "%f",
+        "formatUnits": "Early 80"
+      },
+      {
+        "lowerBound": 0.105,
+        "upperBound": 0.110,
+        "format": "%f",
+        "formatUnits": "Early 79"
+      },
+      {
+        "lowerBound": 0.110,
+        "upperBound": 0.115,
+        "format": "%f",
+        "formatUnits": "Early 78"
+      },
+      {
+        "lowerBound": 0.115,
+        "upperBound": 0.120,
+        "format": "%f",
+        "formatUnits": "Early 77"
+      },
+      {
+        "lowerBound": 0.120,
+        "upperBound": 0.125,
+        "format": "%f",
+        "formatUnits": "Early 76"
+      },
+      {
+        "lowerBound": 0.125,
+        "upperBound": 0.130,
+        "format": "%f",
+        "formatUnits": "Early 75"
+      },
+      {
+        "lowerBound": 0.130,
+        "upperBound": 0.135,
+        "format": "%f",
+        "formatUnits": "Early 74"
+      },
+      {
+        "lowerBound": 0.135,
+        "upperBound": 0.140,
+        "format": "%f",
+        "formatUnits": "Early 73"
+      },
+      {
+        "lowerBound": 0.140,
+        "upperBound": 0.145,
+        "format": "%f",
+        "formatUnits": "Early 72"
+      },
+      {
+        "lowerBound": 0.145,
+        "upperBound": 0.150,
+        "format": "%f",
+        "formatUnits": "Early 71"
+      },
+      {
+        "lowerBound": 0.150,
+        "upperBound": 0.155,
+        "format": "%f",
+        "formatUnits": "Early 70"
+      },
+      {
+        "lowerBound": 0.155,
+        "upperBound": 0.160,
+        "format": "%f",
+        "formatUnits": "Early 69"
+      },
+      {
+        "lowerBound": 0.160,
+        "upperBound": 0.165,
+        "format": "%f",
+        "formatUnits": "Early 68"
+      },
+      {
+        "lowerBound": 0.165,
+        "upperBound": 0.170,
+        "format": "%f",
+        "formatUnits": "Early 67"
+      },
+      {
+        "lowerBound": 0.170,
+        "upperBound": 0.175,
+        "format": "%f",
+        "formatUnits": "Early 66"
+      },
+      {
+        "lowerBound": 0.175,
+        "upperBound": 0.180,
+        "format": "%f",
+        "formatUnits": "Early 65"
+      },
+      {
+        "lowerBound": 0.180,
+        "upperBound": 0.185,
+        "format": "%f",
+        "formatUnits": "Early 64"
+      },
+      {
+        "lowerBound": 0.185,
+        "upperBound": 0.190,
+        "format": "%f",
+        "formatUnits": "Early 63"
+      },
+      {
+        "lowerBound": 0.190,
+        "upperBound": 0.195,
+        "format": "%f",
+        "formatUnits": "Early 62"
+      },
+      {
+        "lowerBound": 0.195,
+        "upperBound": 0.200,
+        "format": "%f",
+        "formatUnits": "Early 61"
+      },
+      {
+        "lowerBound": 0.200,
+        "upperBound": 0.205,
+        "format": "%f",
+        "formatUnits": "Early 60"
+      },
+      {
+        "lowerBound": 0.205,
+        "upperBound": 0.210,
+        "format": "%f",
+        "formatUnits": "Early 59"
+      },
+      {
+        "lowerBound": 0.210,
+        "upperBound": 0.215,
+        "format": "%f",
+        "formatUnits": "Early 58"
+      },
+      {
+        "lowerBound": 0.215,
+        "upperBound": 0.220,
+        "format": "%f",
+        "formatUnits": "Early 57"
+      },
+      {
+        "lowerBound": 0.220,
+        "upperBound": 0.225,
+        "format": "%f",
+        "formatUnits": "Early 56"
+      },
+      {
+        "lowerBound": 0.225,
+        "upperBound": 0.230,
+        "format": "%f",
+        "formatUnits": "Early 55"
+      },
+      {
+        "lowerBound": 0.230,
+        "upperBound": 0.235,
+        "format": "%f",
+        "formatUnits": "Early 54"
+      },
+      {
+        "lowerBound": 0.235,
+        "upperBound": 0.240,
+        "format": "%f",
+        "formatUnits": "Early 53"
+      },
+      {
+        "lowerBound": 0.240,
+        "upperBound": 0.245,
+        "format": "%f",
+        "formatUnits": "Early 52"
+      },
+      {
+        "lowerBound": 0.245,
+        "upperBound": 0.250,
+        "format": "%f",
+        "formatUnits": "Early 51"
+      },
+      {
+        "lowerBound": 0.250,
+        "upperBound": 0.255,
+        "format": "%f",
+        "formatUnits": "Early 50"
+      },
+      {
+        "lowerBound": 0.255,
+        "upperBound": 0.260,
+        "format": "%f",
+        "formatUnits": "Early 49"
+      },
+      {
+        "lowerBound": 0.260,
+        "upperBound": 0.265,
+        "format": "%f",
+        "formatUnits": "Early 48"
+      },
+      {
+        "lowerBound": 0.265,
+        "upperBound": 0.270,
+        "format": "%f",
+        "formatUnits": "Early 47"
+      },
+      {
+        "lowerBound": 0.270,
+        "upperBound": 0.275,
+        "format": "%f",
+        "formatUnits": "Early 46"
+      },
+      {
+        "lowerBound": 0.275,
+        "upperBound": 0.280,
+        "format": "%f",
+        "formatUnits": "Early 45"
+      },
+      {
+        "lowerBound": 0.280,
+        "upperBound": 0.285,
+        "format": "%f",
+        "formatUnits": "Early 44"
+      },
+      {
+        "lowerBound": 0.285,
+        "upperBound": 0.290,
+        "format": "%f",
+        "formatUnits": "Early 43"
+      },
+      {
+        "lowerBound": 0.290,
+        "upperBound": 0.295,
+        "format": "%f",
+        "formatUnits": "Early 42"
+      },
+      {
+        "lowerBound": 0.295,
+        "upperBound": 0.300,
+        "format": "%f",
+        "formatUnits": "Early 41"
+      },
+      {
+        "lowerBound": 0.300,
+        "upperBound": 0.305,
+        "format": "%f",
+        "formatUnits": "Early 40"
+      },
+      {
+        "lowerBound": 0.305,
+        "upperBound": 0.310,
+        "format": "%f",
+        "formatUnits": "Early 39"
+      },
+      {
+        "lowerBound": 0.310,
+        "upperBound": 0.315,
+        "format": "%f",
+        "formatUnits": "Early 38"
+      },
+      {
+        "lowerBound": 0.315,
+        "upperBound": 0.320,
+        "format": "%f",
+        "formatUnits": "Early 37"
+      },
+      {
+        "lowerBound": 0.320,
+        "upperBound": 0.325,
+        "format": "%f",
+        "formatUnits": "Early 36"
+      },
+      {
+        "lowerBound": 0.325,
+        "upperBound": 0.330,
+        "format": "%f",
+        "formatUnits": "Early 35"
+      },
+      {
+        "lowerBound": 0.330,
+        "upperBound": 0.335,
+        "format": "%f",
+        "formatUnits": "Early 34"
+      },
+      {
+        "lowerBound": 0.335,
+        "upperBound": 0.340,
+        "format": "%f",
+        "formatUnits": "Early 33"
+      },
+      {
+        "lowerBound": 0.340,
+        "upperBound": 0.345,
+        "format": "%f",
+        "formatUnits": "Early 32"
+      },
+      {
+        "lowerBound": 0.345,
+        "upperBound": 0.350,
+        "format": "%f",
+        "formatUnits": "Early 31"
+      },
+      {
+        "lowerBound": 0.350,
+        "upperBound": 0.355,
+        "format": "%f",
+        "formatUnits": "Early 30"
+      },
+      {
+        "lowerBound": 0.355,
+        "upperBound": 0.360,
+        "format": "%f",
+        "formatUnits": "Early 29"
+      },
+      {
+        "lowerBound": 0.360,
+        "upperBound": 0.365,
+        "format": "%f",
+        "formatUnits": "Early 28"
+      },
+      {
+        "lowerBound": 0.365,
+        "upperBound": 0.370,
+        "format": "%f",
+        "formatUnits": "Early 27"
+      },
+      {
+        "lowerBound": 0.370,
+        "upperBound": 0.375,
+        "format": "%f",
+        "formatUnits": "Early 26"
+      },
+      {
+        "lowerBound": 0.375,
+        "upperBound": 0.380,
+        "format": "%f",
+        "formatUnits": "Early 25"
+      },
+      {
+        "lowerBound": 0.380,
+        "upperBound": 0.385,
+        "format": "%f",
+        "formatUnits": "Early 24"
+      },
+      {
+        "lowerBound": 0.385,
+        "upperBound": 0.390,
+        "format": "%f",
+        "formatUnits": "Early 23"
+      },
+      {
+        "lowerBound": 0.390,
+        "upperBound": 0.395,
+        "format": "%f",
+        "formatUnits": "Early 22"
+      },
+      {
+        "lowerBound": 0.395,
+        "upperBound": 0.400,
+        "format": "%f",
+        "formatUnits": "Early 21"
+      },
+      {
+        "lowerBound": 0.400,
+        "upperBound": 0.405,
+        "format": "%f",
+        "formatUnits": "Early 20"
+      },
+      {
+        "lowerBound": 0.405,
+        "upperBound": 0.410,
+        "format": "%f",
+        "formatUnits": "Early 19"
+      },
+      {
+        "lowerBound": 0.410,
+        "upperBound": 0.415,
+        "format": "%f",
+        "formatUnits": "Early 18"
+      },
+      {
+        "lowerBound": 0.415,
+        "upperBound": 0.420,
+        "format": "%f",
+        "formatUnits": "Early 17"
+      },
+      {
+        "lowerBound": 0.420,
+        "upperBound": 0.425,
+        "format": "%f",
+        "formatUnits": "Early 16"
+      },
+      {
+        "lowerBound": 0.425,
+        "upperBound": 0.430,
+        "format": "%f",
+        "formatUnits": "Early 15"
+      },
+      {
+        "lowerBound": 0.430,
+        "upperBound": 0.435,
+        "format": "%f",
+        "formatUnits": "Early 14"
+      },
+      {
+        "lowerBound": 0.435,
+        "upperBound": 0.440,
+        "format": "%f",
+        "formatUnits": "Early 13"
+      },
+      {
+        "lowerBound": 0.440,
+        "upperBound": 0.445,
+        "format": "%f",
+        "formatUnits": "Early 12"
+      },
+      {
+        "lowerBound": 0.445,
+        "upperBound": 0.450,
+        "format": "%f",
+        "formatUnits": "Early 11"
+      },
+      {
+        "lowerBound": 0.450,
+        "upperBound": 0.455,
+        "format": "%f",
+        "formatUnits": "Early 10"
+      },
+      {
+        "lowerBound": 0.455,
+        "upperBound": 0.460,
+        "format": "%f",
+        "formatUnits": "Early 9"
+      },
+      {
+        "lowerBound": 0.460,
+        "upperBound": 0.465,
+        "format": "%f",
+        "formatUnits": "Early 8"
+      },
+      {
+        "lowerBound": 0.465,
+        "upperBound": 0.470,
+        "format": "%f",
+        "formatUnits": "Early 7"
+      },
+      {
+        "lowerBound": 0.470,
+        "upperBound": 0.475,
+        "format": "%f",
+        "formatUnits": "Early 6"
+      },
+      {
+        "lowerBound": 0.475,
+        "upperBound": 0.480,
+        "format": "%f",
+        "formatUnits": "Early 5"
+      },
+      {
+        "lowerBound": 0.480,
+        "upperBound": 0.485,
+        "format": "%f",
+        "formatUnits": "Early 4"
+      },
+      {
+        "lowerBound": 0.485,
+        "upperBound": 0.490,
+        "format": "%f",
+        "formatUnits": "Early 3"
+      },
+      {
+        "lowerBound": 0.490,
+        "upperBound": 0.495,
+        "format": "%f",
+        "formatUnits": "Early 2"
+      },
+      {
+        "lowerBound": 0.495,
+        "upperBound": 0.500,
+        "format": "%f",
+        "formatUnits": "Early 1"
+      },
+      {
+        "lowerBound": 0.500,
+        "upperBound": 0.505,
+        "format": "%f",
+        "formatUnits": "Even"
+      },
+      {
+        "lowerBound": 0.505,
+        "upperBound": 0.510,
+        "format": "%f",
+        "formatUnits": "Late 1"
+      },
+      {
+        "lowerBound": 0.510,
+        "upperBound": 0.515,
+        "format": "%f",
+        "formatUnits": "Late 2"
+      },
+      {
+        "lowerBound": 0.515,
+        "upperBound": 0.520,
+        "format": "%f",
+        "formatUnits": "Late 3"
+      },
+      {
+        "lowerBound": 0.520,
+        "upperBound": 0.525,
+        "format": "%f",
+        "formatUnits": "Late 4"
+      },
+      {
+        "lowerBound": 0.525,
+        "upperBound": 0.530,
+        "format": "%f",
+        "formatUnits": "Late 5"
+      },
+      {
+        "lowerBound": 0.530,
+        "upperBound": 0.535,
+        "format": "%f",
+        "formatUnits": "Late 6"
+      },
+      {
+        "lowerBound": 0.535,
+        "upperBound": 0.540,
+        "format": "%f",
+        "formatUnits": "Late 7"
+      },
+      {
+        "lowerBound": 0.540,
+        "upperBound": 0.545,
+        "format": "%f",
+        "formatUnits": "Late 8"
+      },
+      {
+        "lowerBound": 0.545,
+        "upperBound": 0.550,
+        "format": "%f",
+        "formatUnits": "Late 9"
+      },
+      {
+        "lowerBound": 0.550,
+        "upperBound": 0.555,
+        "format": "%f",
+        "formatUnits": "Late 10"
+      },
+      {
+        "lowerBound": 0.555,
+        "upperBound": 0.560,
+        "format": "%f",
+        "formatUnits": "Late 11"
+      },
+      {
+        "lowerBound": 0.560,
+        "upperBound": 0.565,
+        "format": "%f",
+        "formatUnits": "Late 12"
+      },
+      {
+        "lowerBound": 0.565,
+        "upperBound": 0.570,
+        "format": "%f",
+        "formatUnits": "Late 13"
+      },
+      {
+        "lowerBound": 0.570,
+        "upperBound": 0.575,
+        "format": "%f",
+        "formatUnits": "Late 14"
+      },
+      {
+        "lowerBound": 0.575,
+        "upperBound": 0.580,
+        "format": "%f",
+        "formatUnits": "Late 15"
+      },
+      {
+        "lowerBound": 0.580,
+        "upperBound": 0.585,
+        "format": "%f",
+        "formatUnits": "Late 16"
+      },
+      {
+        "lowerBound": 0.585,
+        "upperBound": 0.590,
+        "format": "%f",
+        "formatUnits": "Late 17"
+      },
+      {
+        "lowerBound": 0.590,
+        "upperBound": 0.595,
+        "format": "%f",
+        "formatUnits": "Late 18"
+      },
+      {
+        "lowerBound": 0.595,
+        "upperBound": 0.600,
+        "format": "%f",
+        "formatUnits": "Late 19"
+      },
+      {
+        "lowerBound": 0.600,
+        "upperBound": 0.605,
+        "format": "%f",
+        "formatUnits": "Late 20"
+      },
+      {
+        "lowerBound": 0.605,
+        "upperBound": 0.610,
+        "format": "%f",
+        "formatUnits": "Late 21"
+      },
+      {
+        "lowerBound": 0.610,
+        "upperBound": 0.615,
+        "format": "%f",
+        "formatUnits": "Late 22"
+      },
+      {
+        "lowerBound": 0.615,
+        "upperBound": 0.620,
+        "format": "%f",
+        "formatUnits": "Late 23"
+      },
+      {
+        "lowerBound": 0.620,
+        "upperBound": 0.625,
+        "format": "%f",
+        "formatUnits": "Late 24"
+      },
+      {
+        "lowerBound": 0.625,
+        "upperBound": 0.630,
+        "format": "%f",
+        "formatUnits": "Late 25"
+      },
+      {
+        "lowerBound": 0.630,
+        "upperBound": 0.635,
+        "format": "%f",
+        "formatUnits": "Late 26"
+      },
+      {
+        "lowerBound": 0.635,
+        "upperBound": 0.640,
+        "format": "%f",
+        "formatUnits": "Late 27"
+      },
+      {
+        "lowerBound": 0.640,
+        "upperBound": 0.645,
+        "format": "%f",
+        "formatUnits": "Late 28"
+      },
+      {
+        "lowerBound": 0.645,
+        "upperBound": 0.650,
+        "format": "%f",
+        "formatUnits": "Late 29"
+      },
+      {
+        "lowerBound": 0.650,
+        "upperBound": 0.655,
+        "format": "%f",
+        "formatUnits": "Late 30"
+      },
+      {
+        "lowerBound": 0.655,
+        "upperBound": 0.660,
+        "format": "%f",
+        "formatUnits": "Late 31"
+      },
+      {
+        "lowerBound": 0.660,
+        "upperBound": 0.665,
+        "format": "%f",
+        "formatUnits": "Late 32"
+      },
+      {
+        "lowerBound": 0.665,
+        "upperBound": 0.670,
+        "format": "%f",
+        "formatUnits": "Late 33"
+      },
+      {
+        "lowerBound": 0.670,
+        "upperBound": 0.675,
+        "format": "%f",
+        "formatUnits": "Late 34"
+      },
+      {
+        "lowerBound": 0.675,
+        "upperBound": 0.680,
+        "format": "%f",
+        "formatUnits": "Late 35"
+      },
+      {
+        "lowerBound": 0.680,
+        "upperBound": 0.685,
+        "format": "%f",
+        "formatUnits": "Late 36"
+      },
+      {
+        "lowerBound": 0.685,
+        "upperBound": 0.690,
+        "format": "%f",
+        "formatUnits": "Late 37"
+      },
+      {
+        "lowerBound": 0.690,
+        "upperBound": 0.695,
+        "format": "%f",
+        "formatUnits": "Late 38"
+      },
+      {
+        "lowerBound": 0.695,
+        "upperBound": 0.700,
+        "format": "%f",
+        "formatUnits": "Late 39"
+      },
+      {
+        "lowerBound": 0.700,
+        "upperBound": 0.705,
+        "format": "%f",
+        "formatUnits": "Late 40"
+      },
+      {
+        "lowerBound": 0.705,
+        "upperBound": 0.710,
+        "format": "%f",
+        "formatUnits": "Late 41"
+      },
+      {
+        "lowerBound": 0.710,
+        "upperBound": 0.715,
+        "format": "%f",
+        "formatUnits": "Late 42"
+      },
+      {
+        "lowerBound": 0.715,
+        "upperBound": 0.720,
+        "format": "%f",
+        "formatUnits": "Late 43"
+      },
+      {
+        "lowerBound": 0.720,
+        "upperBound": 0.725,
+        "format": "%f",
+        "formatUnits": "Late 44"
+      },
+      {
+        "lowerBound": 0.725,
+        "upperBound": 0.730,
+        "format": "%f",
+        "formatUnits": "Late 45"
+      },
+      {
+        "lowerBound": 0.730,
+        "upperBound": 0.735,
+        "format": "%f",
+        "formatUnits": "Late 46"
+      },
+      {
+        "lowerBound": 0.735,
+        "upperBound": 0.740,
+        "format": "%f",
+        "formatUnits": "Late 47"
+      },
+      {
+        "lowerBound": 0.740,
+        "upperBound": 0.745,
+        "format": "%f",
+        "formatUnits": "Late 48"
+      },
+      {
+        "lowerBound": 0.745,
+        "upperBound": 0.750,
+        "format": "%f",
+        "formatUnits": "Late 49"
+      },
+      {
+        "lowerBound": 0.750,
+        "upperBound": 0.755,
+        "format": "%f",
+        "formatUnits": "Late 50"
+      },
+      {
+        "lowerBound": 0.750,
+        "upperBound": 0.755,
+        "format": "%f",
+        "formatUnits": "Late 50"
+      },
+      {
+        "lowerBound": 0.755,
+        "upperBound": 0.760,
+        "format": "%f",
+        "formatUnits": "Late 51"
+      },
+      {
+        "lowerBound": 0.760,
+        "upperBound": 0.765,
+        "format": "%f",
+        "formatUnits": "Late 52"
+      },
+      {
+        "lowerBound": 0.765,
+        "upperBound": 0.770,
+        "format": "%f",
+        "formatUnits": "Late 53"
+      },
+      {
+        "lowerBound": 0.770,
+        "upperBound": 0.775,
+        "format": "%f",
+        "formatUnits": "Late 54"
+      },
+      {
+        "lowerBound": 0.775,
+        "upperBound": 0.780,
+        "format": "%f",
+        "formatUnits": "Late 55"
+      },
+      {
+        "lowerBound": 0.780,
+        "upperBound": 0.785,
+        "format": "%f",
+        "formatUnits": "Late 56"
+      },
+      {
+        "lowerBound": 0.785,
+        "upperBound": 0.790,
+        "format": "%f",
+        "formatUnits": "Late 57"
+      },
+      {
+        "lowerBound": 0.790,
+        "upperBound": 0.795,
+        "format": "%f",
+        "formatUnits": "Late 58"
+      },
+      {
+        "lowerBound": 0.795,
+        "upperBound": 0.800,
+        "format": "%f",
+        "formatUnits": "Late 59"
+      },
+      {
+        "lowerBound": 0.800,
+        "upperBound": 0.805,
+        "format": "%f",
+        "formatUnits": "Late 60"
+      },
+      {
+        "lowerBound": 0.805,
+        "upperBound": 0.810,
+        "format": "%f",
+        "formatUnits": "Late 61"
+      },
+      {
+        "lowerBound": 0.810,
+        "upperBound": 0.815,
+        "format": "%f",
+        "formatUnits": "Late 62"
+      },
+      {
+        "lowerBound": 0.815,
+        "upperBound": 0.820,
+        "format": "%f",
+        "formatUnits": "Late 63"
+      },
+      {
+        "lowerBound": 0.820,
+        "upperBound": 0.825,
+        "format": "%f",
+        "formatUnits": "Late 64"
+      },
+      {
+        "lowerBound": 0.825,
+        "upperBound": 0.830,
+        "format": "%f",
+        "formatUnits": "Late 65"
+      },
+      {
+        "lowerBound": 0.830,
+        "upperBound": 0.835,
+        "format": "%f",
+        "formatUnits": "Late 66"
+      },
+      {
+        "lowerBound": 0.835,
+        "upperBound": 0.840,
+        "format": "%f",
+        "formatUnits": "Late 67"
+      },
+      {
+        "lowerBound": 0.840,
+        "upperBound": 0.845,
+        "format": "%f",
+        "formatUnits": "Late 68"
+      },
+      {
+        "lowerBound": 0.845,
+        "upperBound": 0.850,
+        "format": "%f",
+        "formatUnits": "Late 69"
+      },
+      {
+        "lowerBound": 0.850,
+        "upperBound": 0.855,
+        "format": "%f",
+        "formatUnits": "Late 70"
+      },
+      {
+        "lowerBound": 0.855,
+        "upperBound": 0.860,
+        "format": "%f",
+        "formatUnits": "Late 71"
+      },
+      {
+        "lowerBound": 0.860,
+        "upperBound": 0.865,
+        "format": "%f",
+        "formatUnits": "Late 72"
+      },
+      {
+        "lowerBound": 0.865,
+        "upperBound": 0.870,
+        "format": "%f",
+        "formatUnits": "Late 73"
+      },
+      {
+        "lowerBound": 0.870,
+        "upperBound": 0.875,
+        "format": "%f",
+        "formatUnits": "Late 74"
+      },
+      {
+        "lowerBound": 0.875,
+        "upperBound": 0.880,
+        "format": "%f",
+        "formatUnits": "Late 75"
+      },
+      {
+        "lowerBound": 0.880,
+        "upperBound": 0.885,
+        "format": "%f",
+        "formatUnits": "Late 76"
+      },
+      {
+        "lowerBound": 0.885,
+        "upperBound": 0.890,
+        "format": "%f",
+        "formatUnits": "Late 77"
+      },
+      {
+        "lowerBound": 0.890,
+        "upperBound": 0.895,
+        "format": "%f",
+        "formatUnits": "Late 78"
+      },
+      {
+        "lowerBound": 0.895,
+        "upperBound": 0.900,
+        "format": "%f",
+        "formatUnits": "Late 79"
+      },
+      {
+        "lowerBound": 0.900,
+        "upperBound": 0.905,
+        "format": "%f",
+        "formatUnits": "Late 80"
+      },
+      {
+        "lowerBound": 0.905,
+        "upperBound": 0.910,
+        "format": "%f",
+        "formatUnits": "Late 81"
+      },
+      {
+        "lowerBound": 0.910,
+        "upperBound": 0.915,
+        "format": "%f",
+        "formatUnits": "Late 82"
+      },
+      {
+        "lowerBound": 0.915,
+        "upperBound": 0.920,
+        "format": "%f",
+        "formatUnits": "Late 83"
+      },
+      {
+        "lowerBound": 0.920,
+        "upperBound": 0.925,
+        "format": "%f",
+        "formatUnits": "Late 84"
+      },
+      {
+        "lowerBound": 0.925,
+        "upperBound": 0.930,
+        "format": "%f",
+        "formatUnits": "Late 85"
+      },
+      {
+        "lowerBound": 0.930,
+        "upperBound": 0.935,
+        "format": "%f",
+        "formatUnits": "Late 86"
+      },
+      {
+        "lowerBound": 0.935,
+        "upperBound": 0.940,
+        "format": "%f",
+        "formatUnits": "Late 87"
+      },
+      {
+        "lowerBound": 0.940,
+        "upperBound": 0.945,
+        "format": "%f",
+        "formatUnits": "Late 88"
+      },
+      {
+        "lowerBound": 0.945,
+        "upperBound": 0.950,
+        "format": "%f",
+        "formatUnits": "Late 89"
+      },
+      {
+        "lowerBound": 0.950,
+        "upperBound": 0.955,
+        "format": "%f",
+        "formatUnits": "Late 90"
+      },
+      {
+        "lowerBound": 0.955,
+        "upperBound": 0.960,
+        "format": "%f",
+        "formatUnits": "Late 91"
+      },
+      {
+        "lowerBound": 0.960,
+        "upperBound": 0.965,
+        "format": "%f",
+        "formatUnits": "Late 92"
+      },
+      {
+        "lowerBound": 0.965,
+        "upperBound": 0.970,
+        "format": "%f",
+        "formatUnits": "Late 93"
+      },
+      {
+        "lowerBound": 0.970,
+        "upperBound": 0.975,
+        "format": "%f",
+        "formatUnits": "Late 94"
+      },
+      {
+        "lowerBound": 0.975,
+        "upperBound": 0.980,
+        "format": "%f",
+        "formatUnits": "Late 95"
+      },
+      {
+        "lowerBound": 0.980,
+        "upperBound": 0.985,
+        "format": "%f",
+        "formatUnits": "Late 96"
+      },
+      {
+        "lowerBound": 0.985,
+        "upperBound": 0.990,
+        "format": "%f",
+        "formatUnits": "Late 97"
+      },
+      {
+        "lowerBound": 0.990,
+        "upperBound": 0.995,
+        "format": "%f",
+        "formatUnits": "Late 98"
+      },
+      {
+        "lowerBound": 0.995,
+        "upperBound": 1.000,
+        "format": "%f",
+        "formatUnits": "Late 99"
+      },
+      {
+        "lowerBound": 1.000,
+        "upperBound": 1.001,
+        "format": "%f",
+        "formatUnits": "Late 100"
+      }
+    ],
+    "step": {
+      "fine": 0.005,
+      "coarse": 1.0
+    }
+  },
+
+  "amp_fac_type": {
+    "alias": "integer_slider_1based"
+  },
+  "bit_depth": {
+    "alias": "tenths_no_units"
+  },
+  "cab_high_cut": {
+    "alias": "eq_high_cut"
+  },
+  "cab_low_cut": {
+    "alias": "eq_low_cut"
+  },
+  "comp_attack": {
+    "alias": "time_ms"
+  },
+  "comp_decay_10_1000": {
+    "alias": "time_ms"
+  },
+  "comp_decay_10_4000": {
+    "alias": "time_ms"
+  },
+  "comp_hold_time": {
+    "alias": "time_ms"
+  },
+  "comp_release": {
+    "alias": "time_ms"
+  },
+  "filter_q": {
+    "alias": "tenths_no_units"
+  },
+  "fuzz_type": {
+    "alias": "integer_slider"
+  },
+  "integer1-5": {
+    "alias": "integer_slider_1based"
+  },
+  "interval_voice": {
+    "alias": "integer_slider_signed"
+  },
+  "matchstick_tone": {
+    "alias": "integer_slider_1based"
+  },
+  "mod_high_cut": {
+    "alias": "eq_high_cut"
+  },
+  "mod_low_cut": {
+    "alias": "eq_low_cut"
+  },
+  "mod_pitch": {
+    "alias": "osc_freq"
+  },
+  "percent_braced": {
+    "alias": "percent"
+  },
+  "percent_feedback": {
+    "alias": "percent"
+  },
+  "phasing": {
+    "alias": "generic_knob"
+  },
+  "octave": {
+    "alias": "integer_slider_signed"
+  },
+  "octave32": {
+    "alias": "integer_slider_signed"
+  },
+  "pitch": {
+    "alias": "integer_slider_signed"
+  },
+  "preamp_fac": {
+    "alias": "integer_slider_1based"
+  },
+  "q_knob": {
+    "alias": "tenths_no_units"
+  },
+  "shuffling_looper_seqlength": {
+    "alias": "shuffling_looper_slices"
+  },
+  "split_balance": {
+    "alias": "pan"
+  },
+  "sswitch": {
+    "alias": "pan_discrete"
+  },
+  "synth_preset": {
+    "alias": "integer_slider_1based"
+  },
+  "time_ms_0_2000": {
+    "alias": "time_ms"
+  },
+  "time_ms_0_4000": {
+    "alias": "time_ms"
+  },
+  "time_ms_0_8000": {
+    "alias": "time_ms"
+  },
+  "time_ms_10_2000": {
+    "alias": "time_ms"
+  },
+  "time_ms_10_5000": {
+    "alias": "time_ms"
+  },
+  "time_ms_20_300": {
+    "alias": "time_ms"
+  },
+  "time_ms_20_500": {
+    "alias": "time_ms"
+  },
+  "time_ms_20_1800": {
+    "alias": "time_ms"
+  },
+  "time_ms_dist_decay": {
+    "alias": "time_ms"
+  },
+  "time_ms_dist_hold_time": {
+    "alias": "time_ms"
+  },
+  "time_ms_dynamix_flanger": {
+    "alias": "time_ms"
+  },
+  "time_ms_env_lag": {
+    "alias": "time_ms"
+  },
+  "time_ms_filter_attack": {
+    "alias": "time_ms"
+  },
+  "time_ms_filter_decay": {
+    "alias": "time_ms"
+  },
+  "time_ms_input": {
+    "alias": "time_ms"
+  },
+  "time_ms_pitch": {
+    "alias": "time_ms"
+  },
+  "time_ms_reverb": {
+    "alias": "time_ms"
+  },
+  "volume_eq": {
+    "alias": "volume"
+  },
+  "wave_shape_xenofuzz": {
+    "alias": "wave_shape_panner"
+  }
+}
