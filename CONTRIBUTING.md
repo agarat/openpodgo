@@ -43,3 +43,23 @@ USB vendor interface.
 
 By contributing you agree that your contributions are licensed under the
 project's [MIT License](LICENSE).
+
+## Releases (TBD)
+
+El proyecto usa Trunk-Based Development. La versión se deriva del git con
+setuptools-scm; no se edita a mano.
+
+- **Cada push a `main`** dispara `release.yml`: corre los tests, arma sdist+wheel
+  y **pisa** el pre-release rodante `latest` con notas generadas de los commits.
+- **Cortar un estable:** desde `main` actualizado,
+
+  ```bash
+  git tag v0.2.0
+  git push origin v0.2.0
+  ```
+
+  El pipeline crea el Release permanente `0.2.0` con sdist+wheel y el changelog
+  del rango desde el tag anterior.
+
+El changelog sale de los mensajes de commit (`cliff.toml`); no hay `CHANGELOG.md`
+versionado en el repo.
