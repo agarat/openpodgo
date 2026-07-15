@@ -61,6 +61,12 @@ WIRE_CATEGORY = {
     "Cab": 15,
     "Amp": 17,
 }
+#: Display-name fixes for resource typos. The `.models` file names this model
+#: "Warble Eater", but the pedal screen and PGModelCatalog.json say "Warble
+#: Matic" (confirmed against the pedal). Keyed by .sym symbol.
+DISPLAY_NAME_OVERRIDES = {
+    "Warble_Matic": "Warble Matic",
+}
 EQ_STATIC_PREFIX = "HD2_EQ_STATIC_"
 EQ_STATIC_WIRE_CATEGORY = 23
 #: Non-STATIC EQs (Cali Q … Acoustic Sim) live in an Effects block, so they
@@ -215,7 +221,7 @@ def build(
             {*rm.uncertain, *extra_attrs.get(name, ())}
         )
         doc["models"][name] = {
-            "display_name": rm.display_name,
+            "display_name": DISPLAY_NAME_OVERRIDES.get(name, rm.display_name),
             "category": rm.category,
             "subcategory": rm.subcategory,
             "type": types.get(name),
