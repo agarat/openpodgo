@@ -18,8 +18,15 @@ import xml.etree.ElementTree as ET
 from functools import lru_cache
 from pathlib import Path
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor, QFontDatabase, QPainter, QPixmap
+from PySide6.QtCore import QPointF, QRectF, Qt
+from PySide6.QtGui import (
+    QColor,
+    QFontDatabase,
+    QPainter,
+    QPainterPath,
+    QPen,
+    QPixmap,
+)
 
 from .. import catalog
 
@@ -69,6 +76,122 @@ def _tinted(pm: QPixmap, color: str) -> QPixmap:
     p.fillRect(out.rect(), QColor(color))
     p.end()
     return out
+
+
+#: Tint for the drawn (vector) toolbar glyphs used when the official res/ art
+#: is absent. Matches the light-on-dark look of the rest of the UI.
+TOOLBAR_GLYPH_TINT = "#c9cdd3"
+
+
+def _stroke_painter(pm: QPixmap, color: str, width: float) -> QPainter:
+    p = QPainter(pm)
+    p.setRenderHint(QPainter.Antialiasing, True)
+    pen = QPen(QColor(color), width)
+    pen.setJoinStyle(Qt.RoundJoin)
+    pen.setCapStyle(Qt.RoundCap)
+    p.setPen(pen)
+    p.setBrush(Qt.NoBrush)
+    return p
+
+
+def _draw_save(p: QPainter, r: QRectF) -> None:
+    """Floppy-disk glyph (the universal 'save' icon)."""
+    fold = r.width() * 0.26
+    body = QPainterPath()
+    body.moveTo(r.left(), r.top())
+    body.lineTo(r.right() - fold, r.top())
+    body.lineTo(r.right(), r.top() + fold)
+    body.lineTo(r.right(), r.bottom())
+    body.lineTo(r.left(), r.bottom())
+    body.closeSubpath()
+    p.drawPath(body)
+    # Top shutter (small solid tab).
+    sh = QRectF(
+        r.left() + r.width() * 0.30, r.top(),
+        r.width() * 0.30, r.height() * 0.26,
+    )
+    p.fillRect(sh, p.pen().color())
+    # Bottom label area.
+    lab = QRectF(
+        r.left() + r.width() * 0.20, r.top() + r.height() * 0.52,
+        r.width() * 0.60, r.height() * 0.36,
+    )
+    p.drawRect(lab)
+
+
+def _draw_camera(p: QPainter, r: QRectF) -> None:
+    """Camera glyph (snapshots)."""
+    top = r.top() + r.height() * 0.18
+    body = QRectF(r.left(), top, r.width(), r.bottom() - top)
+    p.drawRoundedRect(body, r.width() * 0.14, r.width() * 0.14)
+    # Viewfinder bump.
+    bump = QPainterPath()
+    bx0 = r.left() + r.width() * 0.28
+    bump.moveTo(bx0, top)
+    bump.lineTo(bx0 + r.width() * 0.10, r.top())
+    bump.lineTo(bx0 + r.width() * 0.34, r.top())
+    bump.lineTo(bx0 + r.width() * 0.44, top)
+    p.drawPath(bump)
+    # Lens.
+    cy = (top + r.bottom()) / 2
+    lens = r.width() * 0.20
+    p.drawEllipse(QPointF(r.center().x(), cy), lens, lens)
+
+
+def _draw_undo(p: QPainter, r: QRectF, mirror: bool = False) -> None:
+    """Curved 'undo' arrow — a top semicircle with a down-pointing head on the
+    left end (mirror=True flips it horizontally for 'redo')."""
+    if mirror:
+        p.save()
+        p.translate(r.center().x() * 2, 0)
+        p.scale(-1, 1)
+    # Top-half arc (right end → over the top → left end).
+    arc = QRectF(
+        r.left(), r.top() + r.height() * 0.20,
+        r.width(), r.height() * 0.95,
+    )
+    path = QPainterPath()
+    path.arcMoveTo(arc, 0)
+    path.arcTo(arc, 0, 180)
+    p.drawPath(path)
+    # Arrowhead at the left end, pointing down.
+    tip = path.currentPosition()
+    head = r.width() * 0.24
+    p.drawLine(tip, QPointF(tip.x() - head * 0.55, tip.y() - head * 0.55))
+    p.drawLine(tip, QPointF(tip.x() + head * 0.75, tip.y() - head * 0.30))
+    if mirror:
+        p.restore()
+
+
+_GLYPHS = {
+    "save": _draw_save,
+    "camera": _draw_camera,
+    "undo": _draw_undo,
+    "redo": lambda p, r: _draw_undo(p, r, mirror=True),
+}
+
+
+@lru_cache(maxsize=None)
+def glyph_icon(
+    name: str, size: int = 18, color: str = TOOLBAR_GLYPH_TINT
+) -> QPixmap | None:
+    """Crisp vector fallback icon drawn with QPainter (no res/ needed).
+
+    `name` is one of _GLYPHS. Rendered at 3x and tagged with the device pixel
+    ratio so it stays sharp on hi-dpi displays while laying out at `size`.
+    """
+    draw = _GLYPHS.get(name)
+    if draw is None:
+        return None
+    scale = 3
+    pm = QPixmap(size * scale, size * scale)
+    pm.fill(Qt.transparent)
+    p = _stroke_painter(pm, color, max(1.4 * scale, size * scale * 0.09))
+    pad = size * scale * 0.16
+    draw(p, QRectF(pad, pad, size * scale - 2 * pad, size * scale - 2 * pad))
+    p.end()
+    pm.setDevicePixelRatio(scale)
+    return pm
 
 
 @lru_cache(maxsize=1)

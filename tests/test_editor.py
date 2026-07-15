@@ -157,13 +157,23 @@ def test_io_param_undo():
     assert ed.io_values("output")[1] == 0.0
 
 
-def test_swap_model_uncertain():
+def test_swap_model_looper_class7():
+    # The looper is chain class 7 (id at key 8, params at key 7, category 22),
+    # not a normal class-6 block. Inserting it must build that layout and store
+    # only the 4 on-wire params (RE'd from the pedal).
     ed = _editor()
     slot = _slot_of(ed.preset, 366)
-    # Model without known on-wire category (the dynamic isn't in the build's
-    # WIRE_CATEGORY map) → not swappable until harvest.
-    with pytest.raises(ValueError, match="on-wire category"):
-        ed.swap_model(slot, "HD2_Compressor3BandCompMono")
+    ed.swap_model(slot, "HD2_LooperOneSwitchMono")
+    entry = ed._chain_entries()[slot]
+    assert entry[l6helix.ENTRY_CLASS] == l6helix.CLASS_LOOPER
+    blk = ed.preset.chain[slot]
+    assert blk.model_id == 430
+    assert blk.category == 22
+    assert blk.params == [0.0, 0.0, 20.0, 20000.0]
+    # Round-trips through build_blob (saved to the pedal as the raw body).
+    pre2 = l6helix.parse_blob(l6helix.build_blob(ed.body))
+    assert pre2.chain[slot].model_id == 430
+    assert pre2.chain[slot].params == [0.0, 0.0, 20.0, 20000.0]
 
 
 def test_swap_model_not_seeded():

@@ -161,7 +161,13 @@ ENTRY_PAYLOAD = 20
 CLASS_INPUT = 0
 CLASS_OUTPUT = 1
 CLASS_BLOCK = 6
+CLASS_LOOPER = 7       # the looper is a block of its own class (spec03 follow-up)
 CLASS_EMPTY = 8
+
+# Looper payload: unlike a normal block it stores the model id directly at
+# key 8 (no key-24 model node), carries its params at key 7 (like input/output)
+# and has on-wire category 22. Category/enabled share keys 9/10 with class 6.
+LOOPER_MODEL_ID = 8
 
 # Processing block body.
 BLK_CATEGORY = 9       # 1=FX, 8=delay, 9=fx loop, 15=cab, 17=amp, 23=static EQ
@@ -311,6 +317,15 @@ def parse_body(body: dict) -> Preset:
                     no_snapshot_bypass=bool(
                         model.get(MODEL_NO_SNAPSHOT_BYPASS, False)
                     ),
+                )
+            )
+        elif cls == CLASS_LOOPER:
+            chain.append(
+                Block(
+                    model_id=payload[LOOPER_MODEL_ID],
+                    category=payload[BLK_CATEGORY],
+                    enabled=bool(payload[BLK_ENABLED]),
+                    params=list(payload[IO_PARAMS][PARAMS_VALUES]),
                 )
             )
         else:

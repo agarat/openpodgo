@@ -53,13 +53,16 @@ def test_seeded_consistent_with_backup():
 
 
 def test_wire_category_observed_and_inferred():
-    # Observed in dumps (1=FX, 17=amp) or inferred from official category
-    # validated; None where no data point exists (e.g. dynamics,
-    # which isn't in the build's WIRE_CATEGORY map).
+    # Observed in dumps/harvest (1=FX, 17=amp) or inferred from official
+    # category. All block categories are now harvested (spec03 follow-up).
     assert catalog.model_info("HD2_DM4TubeDrive").wire_category == 1
     assert catalog.model_info("HD2_AmpGCougar800").wire_category == 17
     assert catalog.model_info("HD2_DistMinotaurMono").wire_category == 1
-    assert catalog.model_info("HD2_Compressor3BandCompMono").wire_category is None
+    # Dynamics: on-wire category 1, validated by harvest.
+    assert catalog.model_info("HD2_Compressor3BandCompMono").wire_category == 1
+    # Loopers are their own on-wire category (22); synth generators are 24.
+    assert catalog.model_info("HD2_LooperMono").wire_category == 22
+    assert catalog.model_info("HD2_Synth4OSCGeneratorMono").wire_category == 24
 
 
 def test_eq_effects_wire_category():

@@ -48,9 +48,17 @@ class LibrarianPanel(QWidget):
 
         logo = assets.ui_image("PODGoLogo-small")
         if logo is not None:
+            # The bundled placeholder wordmark is 360px wide; scale it down so
+            # it fits the sidebar instead of being clipped. Render at 2x and
+            # tag the device pixel ratio to keep it crisp on hi-dpi.
+            target_w = 176
+            scaled = logo.scaledToWidth(
+                target_w * 2, Qt.SmoothTransformation
+            )
+            scaled.setDevicePixelRatio(2)
             logo_label = QLabel()
-            logo_label.setPixmap(logo)
-            logo_label.setFixedHeight(logo.height())
+            logo_label.setPixmap(scaled)
+            logo_label.setFixedHeight(scaled.height() // 2)
             lay.addWidget(logo_label)
 
         self._folders = QHBoxLayout()

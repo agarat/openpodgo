@@ -265,7 +265,8 @@ def test_model_select_solo_intercambiables(app):
     assert len(names) > 400  # official resources: amps, legacy cabs, FX…
     assert "HD2_DM4TubeDrive" in names
     assert "HD2_DistMinotaurMono" in names      # already swappable
-    assert "HD2_Compressor3BandCompMono" not in names  # no on-wire category
+    assert "HD2_Compressor3BandCompMono" in names  # harvested on-wire category
+    assert "HD2_LooperMono" in names  # looper: class-7 insertion supported
     assert "P34_AppDSPFlowInput" not in names
     panel.set_filter("triangle")
     assert panel.visible_models() == ["HD2_DistTriangleFuzzMono"]
