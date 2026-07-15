@@ -1,0 +1,45 @@
+[project]
+name = "openpodgo"
+version = "0.1.0"
+description = "Open-source editor for the Line 6 POD Go on Linux (a POD Go Edit clone)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "the OpenPODGo contributors" }]
+keywords = ["line6", "pod-go", "helix", "guitar", "usb", "midi", "reverse-engineering"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Sound/Audio",
+]
+dependencies = [
+    "pyusb>=1.2",
+    "msgpack>=1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/agarat/openpodgo"
+Repository = "https://github.com/agarat/openpodgo"
+Issues = "https://github.com/agarat/openpodgo/issues"
+
+[project.optional-dependencies]
+ui = ["PySide6>=6.5"]
+dev = ["pytest>=7"]
+
+[project.scripts]
+openpodgo = "openpodgo.app:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

@@ -1,0 +1,29 @@
+openpodgo
+Copyright (c) 2026 the OpenPODGo contributors
+Licensed under the MIT License (see LICENSE).
+
+This project is an independent, unofficial tool. It is NOT affiliated with,
+endorsed by, or supported by Yamaha Guitar Group / Line 6. "Line 6", "POD Go",
+"POD Go Edit", "Helix" and related names are trademarks of their respective
+owners and are used here only to describe interoperability.
+
+No proprietary Line 6 / POD Go Edit assets (images, fonts, manuals, or resource
+files) are distributed with this project. See the README for how to supply your
+own copy locally.
+
+--------------------------------------------------------------------------------
+Acknowledgements — reverse-engineering of the Helix/HX USB vendor protocol
+
+This project builds on prior community reverse-engineering work:
+
+  * openhx — allansomensi/openhx (MIT License)
+    https://github.com/allansomensi/openhx
+    The transport, session handshake and preset-stream protocol templates were
+    ported from openhx's HX Stomp XL documentation and adapted to POD Go.
+
+  * helix_usb — kempline/helix_usb (MIT License)
+    https://github.com/kempline/helix_usb
+    Early reverse-engineering of the Line 6 Helix/HX USB protocol.
+
+No source code or documentation from those projects is redistributed here; they
+are credited as the origin of the protocol knowledge this project relies on.
