@@ -1,6 +1,6 @@
 [project]
 name = "openpodgo"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Open-source editor for the Line 6 POD Go on Linux (a POD Go Edit clone)"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -34,7 +34,7 @@ dev = ["pytest>=7"]
 openpodgo = "openpodgo.app:main"
 
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=61", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
@@ -43,3 +43,9 @@ where = ["src"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+
+[tool.setuptools_scm]
+# Versión derivada de los tags git (vX.Y.Z). Sin tag => versión .devN+g<sha>.
+version_scheme = "guess-next-dev"
+local_scheme = "node-and-date"
+fallback_version = "0.0.0"

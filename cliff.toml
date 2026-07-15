@@ -1,0 +1,33 @@
+# git-cliff config for openpodgo's release notes.
+# Groups commits by the scope prefix used in this repo (catalog:, openpodgo:, docs:, ci:, ...).
+[changelog]
+header = ""
+# NOTE: inside this TOML triple-quoted body, a \n is already a literal newline by the
+# time Tera parses the template, so split(pat="\n") below splits on real newlines.
+# Do not "escape" it to \\n — that would break the first-line truncation.
+body = """
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group }}
+{% for commit in commits %}
+- {{ commit.message | split(pat="\n") | first | trim }}{% endfor %}
+{% endfor %}
+"""
+trim = true
+
+[git]
+conventional_commits = false
+split_commits = false
+commit_parsers = [
+  { message = "^catalog", group = "Catálogo" },
+  { message = "^openpodgo", group = "Core" },
+  { message = "^ui", group = "UI" },
+  { message = "^build", group = "Build" },
+  { message = "^ci", group = "CI" },
+  { message = "^docs", group = "Documentación" },
+  { message = "^test", group = "Tests" },
+  { message = "^fix", group = "Fixes" },
+  { message = ".*", group = "Otros" },
+]
+filter_commits = false
+tag_pattern = "v[0-9]*"
+sort_commits = "newest"

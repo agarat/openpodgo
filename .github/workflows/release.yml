@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    uses: ./.github/workflows/tests.yml
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build sdist + wheel
+        run: |
+          pip install build
+          python -m build
+
+      - name: Generate changelog notes
+        run: |
+          pip install git-cliff
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            git-cliff --current -o NOTES.md
+          else
+            git-cliff --unreleased -o NOTES.md
+          fi
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: |
+            dist/*
+            NOTES.md
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+
+      - name: Publish stable release (tag)
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body_path: NOTES.md
+          prerelease: false
+          files: dist/*
+
+      - name: Publish rolling 'latest' (main)
+        if: github.ref_type == 'branch'
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
+        with:
+          tag_name: latest
+          name: "latest (nightly build of the trunk)"
+          body_path: NOTES.md
+          prerelease: true
+          make_latest: false
+          target_commitish: ${{ github.sha }}
+          files: dist/*
