@@ -7,6 +7,12 @@ openpodgo talks to the pedal over the Helix/HX family's USB **vendor protocol**
 and adapted to the POD Go (`0e41:4247`). It runs where the official editor does
 not: Linux.
 
+## Screenshots
+
+![Main window](/docs/img/main-window.png)
+![Model selection](/docs/img/model-selection.png)
+![Footswitch assign](/docs/img/footswitch-assign.png)
+
 > ⚠️ **Unofficial.** This project is not affiliated with, endorsed by, or
 > supported by Yamaha Guitar Group / Line 6. Use at your own risk. See
 > [Disclaimer](#disclaimer).
