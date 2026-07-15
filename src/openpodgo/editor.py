@@ -37,6 +37,37 @@ OUTPUT_MODEL = "P34_AppDSPFlowOutput"
 BLK_PARAMS_AUX = 12
 #: On-wire category of amps (key 9 of the block).
 CATEGORY_AMP = 17
+#: Looper on-wire params (class 7): the preset stores only the first 4 of the
+#: catalog param_order (Playback, Overdub, lowCut, highCut); the remaining 6
+#: (Slow, Reverse, Once, Undo, …) are runtime toggles not saved in the blob.
+#: RE'd from the pedal (HD2_LooperOneSwitchMono → params [0, 0, 20, 20000]).
+LOOPER_STORED_PARAMS = 4
+
+#: Chain entry classes that occupy a UI slot: normal blocks, loopers (class 7)
+#: and empties. The looper is a distinct class, so every slot enumeration must
+#: include it or indices desync on any preset that contains one.
+_SLOT_CLASSES = (l6helix.CLASS_BLOCK, l6helix.CLASS_LOOPER, l6helix.CLASS_EMPTY)
+#: Occupied slot classes (carry a model): everything but the empty slot.
+_OCCUPIED_CLASSES = (l6helix.CLASS_BLOCK, l6helix.CLASS_LOOPER)
+
+
+def _entry_model_id(entry: dict) -> int:
+    """Model id of a chain entry, across block classes (6 and 7)."""
+    payload = entry[l6helix.ENTRY_PAYLOAD]
+    if entry[l6helix.ENTRY_CLASS] == l6helix.CLASS_LOOPER:
+        return payload[l6helix.LOOPER_MODEL_ID]
+    return payload[l6helix.BLK_MODEL][l6helix.MODEL_ID]
+
+
+def _entry_params_node(entry: dict) -> dict:
+    """Params node ({2,3,4}) of a chain entry: key 7 for loopers, 11 otherwise."""
+    payload = entry[l6helix.ENTRY_PAYLOAD]
+    key = (
+        l6helix.IO_PARAMS
+        if entry[l6helix.ENTRY_CLASS] == l6helix.CLASS_LOOPER
+        else l6helix.BLK_PARAMS
+    )
+    return payload[key]
 
 # Footswitch node keys (body[3], see lab-notes): 8 = groups per
 # switch; each entry {10: order in group, 11: {5: label, 6: ledcolor auto,
@@ -182,22 +213,25 @@ class PresetEditor:
     # --- chain access ---
 
     def _chain_entries(self) -> list[dict]:
-        """Chain entries that occupy a slot (blocks and empties), in order."""
+        """Chain entries that occupy a slot (blocks, loopers, empties), in order."""
         return [
             e
             for e in self.body[l6helix.BODY_DSP0][l6helix.DSP_CHAIN]
-            if e[l6helix.ENTRY_CLASS] in (l6helix.CLASS_BLOCK, l6helix.CLASS_EMPTY)
+            if e[l6helix.ENTRY_CLASS] in _SLOT_CLASSES
         ]
 
     def _block_payload(self, slot: int) -> dict:
         entry = self._chain_entries()[slot]
-        if entry[l6helix.ENTRY_CLASS] != l6helix.CLASS_BLOCK:
+        if entry[l6helix.ENTRY_CLASS] not in _OCCUPIED_CLASSES:
             raise ValueError(f"slot {slot} is empty")
         return entry[l6helix.ENTRY_PAYLOAD]
 
     def params_node(self, slot: int) -> dict:
         """Params node of the block: {2: n_total, 3: n_snapshot, 4: values}."""
-        return self._block_payload(slot)[l6helix.BLK_PARAMS]
+        entry = self._chain_entries()[slot]
+        if entry[l6helix.ENTRY_CLASS] not in _OCCUPIED_CLASSES:
+            raise ValueError(f"slot {slot} is empty")
+        return _entry_params_node(entry)
 
     # --- mutations ---
 
@@ -232,14 +266,14 @@ class PresetEditor:
         full = self.body[l6helix.BODY_DSP0][l6helix.DSP_CHAIN]
         slot_idxs = [
             i for i, e in enumerate(full)
-            if e[l6helix.ENTRY_CLASS] in (l6helix.CLASS_BLOCK, l6helix.CLASS_EMPTY)
+            if e[l6helix.ENTRY_CLASS] in _SLOT_CLASSES
         ]
         n = len(slot_idxs)
         if not (0 <= from_slot < n) or not (0 <= to_slot < n):
             raise ValueError(
                 f"slots out of range (0-{n - 1}): from={from_slot} to={to_slot}"
             )
-        if full[slot_idxs[from_slot]][l6helix.ENTRY_CLASS] != l6helix.CLASS_BLOCK:
+        if full[slot_idxs[from_slot]][l6helix.ENTRY_CLASS] not in _OCCUPIED_CLASSES:
             raise ValueError(f"slot {from_slot} is empty: no block to move")
         if from_slot == to_slot:
             return
@@ -323,6 +357,9 @@ class PresetEditor:
             raise ValueError(f"{model_name}: no known on-wire category")
         self._check_swap_allowed(slot, model_name)
         self._checkpoint()
+        if catalog.display_category(model_name) == "Looper":
+            self._write_looper(slot, info)
+            return
         values = [info.defaults[p] for p in info.param_order]
         n_extras = sum(1 for p in info.param_order if p.startswith("@"))
         entry = self._chain_entries()[slot]
@@ -345,6 +382,33 @@ class PresetEditor:
                 l6helix.PARAMS_TOTAL: 0,
                 l6helix.PARAMS_SNAPSHOTTABLE: 0,
                 l6helix.PARAMS_VALUES: [],
+            },
+        }
+
+    def _write_looper(self, slot: int, info: catalog.ModelInfo) -> None:
+        """Build the class-7 looper entry in the slot (spec03 follow-up).
+
+        The looper is chain class 7 (see l6helix.CLASS_LOOPER): the model id
+        lives directly at key 8 (no key-24 node), the params at key 7 (like
+        input/output), and it stores only LOOPER_STORED_PARAMS values. Layout
+        RE'd from the pedal. The live single-block write (device.set_model,
+        op 40) only sends the wire_id and lets the pedal build the block; this
+        keeps the in-memory body correct for saving the full preset.
+        """
+        values = [
+            info.defaults[p]
+            for p in info.param_order[:LOOPER_STORED_PARAMS]
+        ]
+        entry = self._chain_entries()[slot]
+        entry[l6helix.ENTRY_CLASS] = l6helix.CLASS_LOOPER
+        entry[l6helix.ENTRY_PAYLOAD] = {
+            l6helix.LOOPER_MODEL_ID: info.wire_id,
+            l6helix.BLK_CATEGORY: info.wire_category,
+            l6helix.BLK_ENABLED: True,
+            l6helix.IO_PARAMS: {
+                l6helix.PARAMS_TOTAL: len(values),
+                l6helix.PARAMS_SNAPSHOTTABLE: len(values),
+                l6helix.PARAMS_VALUES: values,
             },
         }
 
@@ -726,14 +790,12 @@ class PresetEditor:
             raise ValueError(
                 f"slot {slot} out of range (0-{len(entries) - 1})"
             )
-        if entries[slot][l6helix.ENTRY_CLASS] != l6helix.CLASS_BLOCK:
+        if entries[slot][l6helix.ENTRY_CLASS] not in _OCCUPIED_CLASSES:
             raise ValueError(f"slot {slot} is empty")
         full = self.body[l6helix.BODY_DSP0][l6helix.DSP_CHAIN]
         count = -1
         for raw_idx, entry in enumerate(full):
-            if entry[l6helix.ENTRY_CLASS] in (
-                l6helix.CLASS_BLOCK, l6helix.CLASS_EMPTY
-            ):
+            if entry[l6helix.ENTRY_CLASS] in _SLOT_CLASSES:
                 count += 1
                 if count == slot:
                     return raw_idx
@@ -752,9 +814,7 @@ class PresetEditor:
             return None
         count = -1
         for i, entry in enumerate(full):
-            if entry[l6helix.ENTRY_CLASS] in (
-                l6helix.CLASS_BLOCK, l6helix.CLASS_EMPTY
-            ):
+            if entry[l6helix.ENTRY_CLASS] in _SLOT_CLASSES:
                 count += 1
                 if i == raw_idx:
                     return count
@@ -819,6 +879,12 @@ class PresetEditor:
             elif cls == l6helix.CLASS_BLOCK:
                 out[f"block{slot}"] = self._pgp_block(payload, slot)
                 slot += 1
+            elif cls == l6helix.CLASS_LOOPER:
+                # The .pgp representation of the looper is not reverse-engineered
+                # yet; refuse rather than emit a malformed/misaligned export.
+                raise UnknownModelError(
+                    f"slot {slot}: .pgp export of the looper is not supported yet"
+                )
         return out
 
     def _pgp_block(self, payload: dict, position: int) -> dict:
@@ -855,7 +921,7 @@ class PresetEditor:
         return block
 
     def _block_param_names(self, slot: int) -> tuple[str, ...]:
-        model_id = self._block_payload(slot)[l6helix.BLK_MODEL][l6helix.MODEL_ID]
+        model_id = _entry_model_id(self._chain_entries()[slot])
         md = catalog.lookup(model_id)
         return md.params if md else ()
 

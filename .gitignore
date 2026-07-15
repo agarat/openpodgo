@@ -21,6 +21,7 @@ htmlcov/
 # Proprietary POD Go Edit resources — user-supplied, never redistributed.
 # Copy your POD Go Edit installation's res/ folder here (see README).
 /res/
+/res-2/
 
 # Reverse-engineering captures and device data — local only, not published.
 # (Personal presets, USB packet captures, full device backups, official dumps.)

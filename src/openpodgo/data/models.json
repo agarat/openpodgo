@@ -57,7 +57,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 515
   },
   "DoubleBass": {
@@ -108,7 +108,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 516
   },
   "HD2_AmpA30FawnBrt": {
@@ -16966,7 +16966,7 @@
    "uncertain": [
     "IrData"
    ],
-   "wire_category": 15,
+   "wire_category": 26,
    "wire_id": 546
   },
   "HD2_CabMicIr_1x12OpenCast": {
@@ -17229,7 +17229,7 @@
    "uncertain": [
     "IrData"
    ],
-   "wire_category": 15,
+   "wire_category": 26,
    "wire_id": 548
   },
   "HD2_CabMicIr_1x15AmpegB15": {
@@ -18536,7 +18536,7 @@
    "uncertain": [
     "IrData"
    ],
-   "wire_category": 15,
+   "wire_category": 26,
    "wire_id": 556
   },
   "HD2_CabMicIr_4x10TweedP10R": {
@@ -19060,7 +19060,7 @@
    "uncertain": [
     "IrData"
    ],
-   "wire_category": 15,
+   "wire_category": 26,
    "wire_id": 540
   },
   "HD2_CabMicIr_4x12CartogC90": {
@@ -19671,7 +19671,7 @@
    "uncertain": [
     "IrData"
    ],
-   "wire_category": 15,
+   "wire_category": 26,
    "wire_id": 541
   },
   "HD2_CabMicIr_4x12SoloLeadEM": {
@@ -21236,7 +21236,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 310
   },
   "HD2_CompressorAutoSwellMono": {
@@ -21305,7 +21305,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 304
   },
   "HD2_CompressorDeluxeCompMono": {
@@ -21383,7 +21383,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 99
   },
   "HD2_CompressorKinkyCompMono": {
@@ -21443,7 +21443,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 408
   },
   "HD2_CompressorLAStudioCompMono": {
@@ -21512,7 +21512,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 100
   },
   "HD2_CompressorOptoCompMono": {
@@ -21565,7 +21565,7 @@
    "uncertain": [
     "@stereo"
    ],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 525
   },
   "HD2_CompressorRedSqueezeMono": {
@@ -21607,7 +21607,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 101
   },
   "HD2_CompressorRochesterCompMono": {
@@ -21694,7 +21694,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 477
   },
   "HD2_DL4AnalogDelayStereo": {
@@ -23239,7 +23239,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 346
   },
   "HD2_DM4BlueComp": {
@@ -23272,7 +23272,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 347
   },
   "HD2_DM4BlueCompTreb": {
@@ -23305,7 +23305,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 348
   },
   "HD2_DM4BoostComp": {
@@ -23374,7 +23374,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 349
   },
   "HD2_DM4BuzzSaw": {
@@ -24127,7 +24127,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 362
   },
   "HD2_DM4Screamer": {
@@ -24280,7 +24280,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 365
   },
   "HD2_DM4TubeDrive": {
@@ -24373,7 +24373,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 367
   },
   "HD2_DM4VettaJuice": {
@@ -24406,7 +24406,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 368
   },
   "HD2_DelayADTStereo": {
@@ -30940,7 +30940,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 369
   },
   "HD2_FM4CometTrails": {
@@ -31288,7 +31288,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 373
   },
   "HD2_FM4QFilter": {
@@ -31669,7 +31669,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 378
   },
   "HD2_FM4SynthString": {
@@ -31756,7 +31756,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 379
   },
   "HD2_FM4Throbber": {
@@ -32239,7 +32239,7 @@
    "subcategory": null,
    "type": 5,
    "uncertain": [],
-   "wire_category": 9,
+   "wire_category": 13,
    "wire_id": 123
   },
   "HD2_FilterAshevillePattrnStereo": {
@@ -33256,7 +33256,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 102
   },
   "HD2_GateHorizonGateMono": {
@@ -33307,7 +33307,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 492
   },
   "HD2_GateNoiseGateMono": {
@@ -33349,7 +33349,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 103
   },
   "HD2_ImpulseResponse1024Mono": {
@@ -33514,7 +33514,7 @@
    "subcategory": null,
    "type": null,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 22,
    "wire_id": 127
   },
   "HD2_LooperOneSwitchMono": {
@@ -33619,7 +33619,7 @@
    "subcategory": null,
    "type": null,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 22,
    "wire_id": 430
   },
   "HD2_LooperOneSwitchStereo": {
@@ -33724,7 +33724,7 @@
    "subcategory": null,
    "type": null,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 22,
    "wire_id": 431
   },
   "HD2_LooperStereo": {
@@ -33829,7 +33829,7 @@
    "subcategory": null,
    "type": null,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 22,
    "wire_id": 128
   },
   "HD2_M1380AFlanger": {
@@ -34054,7 +34054,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 407
   },
   "HD2_MM4AnalogChorus": {
@@ -36121,7 +36121,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 253
   },
   "HD2_PitchPitchWhamMono": {
@@ -36181,7 +36181,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 145
   },
   "HD2_PitchSimplePitchMono": {
@@ -36250,7 +36250,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 251
   },
   "HD2_PitchTwinHarmonyMono": {
@@ -36355,7 +36355,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 146
   },
   "HD2_PreampA30FawnBrt": {
@@ -46791,7 +46791,7 @@
    "subcategory": null,
    "type": 5,
    "uncertain": [],
-   "wire_category": 1,
+   "wire_category": 8,
    "wire_id": 201
   },
   "HD2_ReverbCaveStereo": {
@@ -46869,7 +46869,7 @@
    "subcategory": null,
    "type": 5,
    "uncertain": [],
-   "wire_category": 1,
+   "wire_category": 8,
    "wire_id": 202
   },
   "HD2_ReverbChamberStereo": {
@@ -46947,7 +46947,7 @@
    "subcategory": null,
    "type": 5,
    "uncertain": [],
-   "wire_category": 1,
+   "wire_category": 8,
    "wire_id": 203
   },
   "HD2_ReverbDoubleTankStereo": {
@@ -47043,7 +47043,7 @@
    "subcategory": null,
    "type": 5,
    "uncertain": [],
-   "wire_category": 1,
+   "wire_category": 8,
    "wire_id": 424
   },
   "HD2_ReverbDuckingStereo": {
@@ -47199,7 +47199,7 @@
    "subcategory": null,
    "type": 5,
    "uncertain": [],
-   "wire_category": 1,
+   "wire_category": 8,
    "wire_id": 205
   },
   "HD2_ReverbGanymedeStereo": {
@@ -47277,7 +47277,7 @@
    "subcategory": null,
    "type": 5,
    "uncertain": [],
-   "wire_category": 1,
+   "wire_category": 8,
    "wire_id": 422
   },
   "HD2_ReverbGlitzStereo": {
@@ -47418,7 +47418,7 @@
    "subcategory": null,
    "type": 5,
    "uncertain": [],
-   "wire_category": 1,
+   "wire_category": 8,
    "wire_id": 421
   },
   "HD2_ReverbHallStereo": {
@@ -47496,7 +47496,7 @@
    "subcategory": null,
    "type": 5,
    "uncertain": [],
-   "wire_category": 1,
+   "wire_category": 8,
    "wire_id": 206
   },
   "HD2_ReverbHxSpringStereo": {
@@ -47663,7 +47663,7 @@
    "subcategory": null,
    "type": 5,
    "uncertain": [],
-   "wire_category": 1,
+   "wire_category": 8,
    "wire_id": 207
   },
   "HD2_ReverbParticleStereo": {
@@ -47723,7 +47723,7 @@
    "subcategory": null,
    "type": 5,
    "uncertain": [],
-   "wire_category": 1,
+   "wire_category": 8,
    "wire_id": 208
   },
   "HD2_ReverbPlateStereo": {
@@ -47801,7 +47801,7 @@
    "subcategory": null,
    "type": 5,
    "uncertain": [],
-   "wire_category": 1,
+   "wire_category": 8,
    "wire_id": 209
   },
   "HD2_ReverbPlateauxStereo": {
@@ -47924,7 +47924,7 @@
    "subcategory": null,
    "type": 5,
    "uncertain": [],
-   "wire_category": 1,
+   "wire_category": 8,
    "wire_id": 425
   },
   "HD2_ReverbRoomStereo": {
@@ -48002,7 +48002,7 @@
    "subcategory": null,
    "type": 5,
    "uncertain": [],
-   "wire_category": 1,
+   "wire_category": 8,
    "wire_id": 210
   },
   "HD2_ReverbSearchlightsStereo": {
@@ -48116,7 +48116,7 @@
    "subcategory": null,
    "type": 5,
    "uncertain": [],
-   "wire_category": 1,
+   "wire_category": 8,
    "wire_id": 423
   },
   "HD2_ReverbSpringStereo": {
@@ -48194,7 +48194,7 @@
    "subcategory": null,
    "type": 5,
    "uncertain": [],
-   "wire_category": 1,
+   "wire_category": 8,
    "wire_id": 211
   },
   "HD2_ReverbTileStereo": {
@@ -48272,7 +48272,7 @@
    "subcategory": null,
    "type": 5,
    "uncertain": [],
-   "wire_category": 1,
+   "wire_category": 8,
    "wire_id": 212
   },
   "HD2_RingModulatorAMRingModStereo": {
@@ -49286,7 +49286,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 24,
    "wire_id": 318
   },
   "HD2_Synth4OSCGeneratorMono": {
@@ -49454,7 +49454,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 24,
    "wire_id": 320
   },
   "HD2_Tremolo60sBiasTremStereo": {
@@ -51231,7 +51231,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 517
   },
   "SampleAndHold": {
@@ -51351,7 +51351,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 518
   },
   "SeismicSynth": {
@@ -51393,7 +51393,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 519
   },
   "Sweeper": {
@@ -51540,7 +51540,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 520
   },
   "SynthFX": {
@@ -51600,7 +51600,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 521
   },
   "SynthHarmony": {
@@ -51660,7 +51660,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 522
   },
   "SynthLead": {
@@ -51720,7 +51720,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 523
   },
   "SynthString": {
@@ -51780,7 +51780,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 524
   },
   "TapeEater": {
@@ -52404,7 +52404,7 @@
    "uncertain": [
     "@stereo"
    ],
-   "wire_category": 1,
+   "wire_category": 8,
    "wire_id": 512
   },
   "VIC_FlexoVibeStereo": {
@@ -52533,7 +52533,7 @@
    "subcategory": null,
    "type": 0,
    "uncertain": [],
-   "wire_category": null,
+   "wire_category": 1,
    "wire_id": 567
   },
   "VIC_ReverbDynAmbienceStereo": {
@@ -52772,7 +52772,7 @@
    "uncertain": [
     "@stereo"
    ],
-   "wire_category": 1,
+   "wire_category": 8,
    "wire_id": 528
   },
   "VIC_ReverbRotatingStereo": {
@@ -52906,7 +52906,7 @@
    "uncertain": [
     "@stereo"
    ],
-   "wire_category": 1,
+   "wire_category": 8,
    "wire_id": 500
   },
   "VIC_ReverbShimmerStereo": {

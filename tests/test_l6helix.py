@@ -163,3 +163,24 @@ def test_parse_blob_unknown_class():
     blob = msgpack.packb("l6-helix\x00") + table + body
     with pytest.raises(ValueError, match="unknown class"):
         l6helix.parse_blob(blob)
+
+
+def test_parse_body_looper_class7():
+    # The looper is chain class 7: model id at key 8 (no key-24 node), params
+    # at key 7 (like input/output), on-wire category 22. Confirmed against the
+    # pedal (HD2_LooperOneSwitchMono, id 430).
+    body = {
+        0: {21: 0, 22: [{
+            19: l6helix.CLASS_LOOPER,
+            20: {8: 430, 9: 22, 10: False, 7: {2: 4, 3: 4,
+                                               4: [0.0, 0.0, 20.0, 20000.0]}},
+        }]},
+    }
+    pre = l6helix.parse_body(body)
+    assert len(pre.chain) == 1
+    blk = pre.chain[0]
+    assert blk is not None
+    assert blk.model_id == 430
+    assert blk.category == 22
+    assert blk.enabled is False
+    assert blk.params == [0.0, 0.0, 20.0, 20000.0]

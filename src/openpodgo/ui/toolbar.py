@@ -25,9 +25,15 @@ from . import assets
 
 
 
-def _icon_button(image: str, fallback: str, tooltip: str = "") -> QToolButton:
+def _icon_button(
+    image: str, fallback: str, tooltip: str = "", glyph: str | None = None
+) -> QToolButton:
     btn = QToolButton()
+    # Prefer the official res/ sprite; otherwise a crisp drawn vector glyph;
+    # only fall back to raw text/emoji if neither is available.
     pm = assets.ui_image(image)
+    if pm is None and glyph is not None:
+        pm = assets.glyph_icon(glyph)
     if pm is not None:
         btn.setIcon(QIcon(pm))
         btn.setIconSize(QSize(18, 18))
@@ -80,12 +86,15 @@ class EditorToolbar(QWidget):
         self.title_label.setTextFormat(Qt.RichText)
         lay.addWidget(self.title_label)
 
-        self.save_btn = _icon_button("btn-preset-save", "Save", "Save the active buffer to the current slot")
+        self.save_btn = _icon_button(
+            "btn-preset-save", "Save",
+            "Save the active buffer to the current slot", glyph="save",
+        )
         self.save_btn.clicked.connect(self.save_requested)
         lay.addWidget(self.save_btn)
 
         self.snapshots_btn = _icon_button(
-            "icon-snapshots", "📷", "Preset snapshots"
+            "icon-snapshots", "📷", "Preset snapshots", glyph="camera"
         )
         self.snapshots_btn.setPopupMode(QToolButton.InstantPopup)
         self._snap_menu = QMenu(self)
@@ -98,11 +107,15 @@ class EditorToolbar(QWidget):
         self.snapshots_btn.setMenu(self._snap_menu)
         lay.addWidget(self.snapshots_btn)
 
-        self.undo_btn = _icon_button("btn-undo", "↶", "Undo (Ctrl+Z)")
+        self.undo_btn = _icon_button(
+            "btn-undo", "↶", "Undo (Ctrl+Z)", glyph="undo"
+        )
         self.undo_btn.clicked.connect(self.undo_requested)
         self.undo_btn.setEnabled(False)
         lay.addWidget(self.undo_btn)
-        self.redo_btn = _icon_button("btn-redo", "↷", "Redo (Ctrl+Shift+Z)")
+        self.redo_btn = _icon_button(
+            "btn-redo", "↷", "Redo (Ctrl+Shift+Z)", glyph="redo"
+        )
         self.redo_btn.clicked.connect(self.redo_requested)
         self.redo_btn.setEnabled(False)
         lay.addWidget(self.redo_btn)
