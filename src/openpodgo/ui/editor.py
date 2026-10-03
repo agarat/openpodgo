@@ -262,9 +262,14 @@ class EditorView(QWidget):
             return
         new_state = not block.enabled
         self.editor.set_bypass(slot, new_state)
+        self._selected = slot  # the op 33 refresh targets the selected block
         self._mark_modified()
         self._refresh()
         self.bypass_midi_sent.emit(slot, new_state)
+        # There is no punctual vendor op for bypass yet (pending RE), and MIDI
+        # only reaches blocks assigned to a footswitch: synced via the complete
+        # blob dump (op 21), like assignments (issue #2).
+        self.chain_write_requested.emit()
 
     def apply_model(self, slot: int, model_name: str) -> None:
         self.editor.swap_model(slot, model_name)

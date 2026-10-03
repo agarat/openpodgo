@@ -178,3 +178,26 @@ def test_activate_preset_limpia_reread_pendiente(app):
     win._activate_preset(5)
     assert win._chain_reread_pending is False
     assert win._chain_reread_to_slot is None
+
+
+def test_chain_write_con_worker_ocupado_queda_pendiente(app):
+    # Issue #2: a chain write requested while a worker is in flight (e.g. two
+    # quick bypass toggles) is not lost: it is queued and flushed afterwards
+    # with the CURRENT editor state.
+    win = _window(app)
+    _load_preset(win)
+    runs = []
+    win._run = lambda fn, on_done: runs.append(fn)
+    win.editor_view.select_slot(0)
+    win._workers.add(object())  # simula un worker en vuelo
+    try:
+        win._write_chain_to_pedal()
+        assert runs == []
+        assert win._chain_write_pending is True
+    finally:
+        win._workers.clear()
+    win._flush_pending_chain_write()
+    assert len(runs) == 1
+    assert win._chain_write_pending is False
+    win._flush_pending_chain_write()  # nada pendiente → no relanza
+    assert len(runs) == 1

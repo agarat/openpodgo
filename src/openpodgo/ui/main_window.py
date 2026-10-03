@@ -83,6 +83,10 @@ class MainWindow(QMainWindow):
         self._chain_reread_timer = QTimer(self)
         self._chain_reread_timer.setSingleShot(True)
         self._chain_reread_timer.timeout.connect(self._open_editor)
+        #: A chain write (op 21) requested while a worker was in flight: it is
+        #: flushed when the worker finishes instead of being dropped (issue #2,
+        #: e.g. two quick bypass toggles).
+        self._chain_write_pending = False
 
         self._build_ui()
         self._build_menu()
@@ -533,6 +537,7 @@ class MainWindow(QMainWindow):
         reader) instead of directly, so as not to contend with event polling.
         """
         if self._workers:
+            self._chain_write_pending = True
             return
         ed = self.editor_view.editor
         if ed is None or self.device is None:
@@ -563,11 +568,20 @@ class MainWindow(QMainWindow):
                 # The pedal will echo chain_changed for our own write: we drop
                 # it (we already have the state in memory) so as not to re-read.
                 self._suppress_chain_echo = True
-                self._status("Block order applied on the pedal ✓")
+                self._status("Change applied on the pedal ✓")
             else:
-                self.statusBar().showMessage("Error reordering on the pedal")
+                self.statusBar().showMessage("Error applying the change on the pedal")
 
         self._run(job, on_done)
+
+    def _flush_pending_chain_write(self) -> None:
+        """Run the chain write queued while a worker was busy, if any.
+
+        The blob is taken at run time, so it carries the latest editor state.
+        """
+        if self._chain_write_pending and not self._workers:
+            self._chain_write_pending = False
+            self._write_chain_to_pedal()
 
     # --- live sync: changes coming from the pedal ---
 
@@ -681,6 +695,7 @@ class MainWindow(QMainWindow):
             w.deleteLater()
             if self._notification_reader is not None:
                 self._notification_reader.resume()
+            self._flush_pending_chain_write()
 
         worker.finished.connect(_cleanup)
         self._workers.add(worker)
