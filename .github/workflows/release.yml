@@ -72,8 +72,10 @@ jobs:
           files: dist/*
 
       # action-gh-release only uses target_commitish when it CREATES the tag:
-      # an existing 'latest' must be moved to this commit explicitly.
-      - name: Move 'latest' tag to this commit (main)
+      # an existing 'latest' must be moved to this commit explicitly. Its old
+      # assets are removed too: each build has a different version in the
+      # filename, so they would pile up instead of being replaced.
+      - name: Move 'latest' tag to this commit and prune its assets (main)
         if: github.ref_type == 'branch'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -82,6 +84,12 @@ jobs:
           if gh api "repos/${REPO}/git/ref/tags/latest" >/dev/null 2>&1; then
             gh api -X PATCH "repos/${REPO}/git/refs/tags/latest" \
               -f sha="${GITHUB_SHA}" -F force=true
+          fi
+          if gh release view latest -R "${REPO}" >/dev/null 2>&1; then
+            gh release view latest -R "${REPO}" --json assets --jq '.assets[].name' |
+              while read -r asset; do
+                gh release delete-asset latest "${asset}" -R "${REPO}" --yes
+              done
           fi
 
       - name: Publish rolling 'latest' (main)
