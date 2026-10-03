@@ -178,3 +178,50 @@ def test_activate_preset_limpia_reread_pendiente(app):
     win._activate_preset(5)
     assert win._chain_reread_pending is False
     assert win._chain_reread_to_slot is None
+
+
+def test_chain_write_con_worker_ocupado_queda_pendiente(app):
+    # Issue #2: a chain write requested while a worker is in flight (e.g. two
+    # quick bypass toggles) is not lost: it is queued and flushed afterwards
+    # with the CURRENT editor state.
+    win = _window(app)
+    _load_preset(win)
+    runs = []
+    win._run = lambda fn, on_done: runs.append(fn)
+    win.editor_view.select_slot(0)
+    win._workers.add(object())  # simula un worker en vuelo
+    try:
+        win._write_chain_to_pedal()
+        assert runs == []
+        assert win._chain_write_pending is True
+    finally:
+        win._workers.clear()
+    win._flush_pending_chain_write()
+    assert len(runs) == 1
+    assert win._chain_write_pending is False
+    win._flush_pending_chain_write()  # nada pendiente → no relanza
+    assert len(runs) == 1
+
+
+def test_show_preset_descarta_chain_write_pendiente(app):
+    # A write queued against the previous preset must not dump the newly
+    # loaded one (nobody edited it).
+    win = _window(app)
+    state, _pre = _load_into_editor(win)
+    win._chain_write_pending = True
+    blob = l6helix.extract_blob((CAPS / "spec02_knob.bin").read_bytes())
+    win._show_preset(state, l6helix.parse_blob(blob))
+    assert win._chain_write_pending is False
+
+
+def test_eco_de_dos_chain_writes_seguidos_no_dispara_reread(app):
+    # Two back-to-back chain writes → two echoes; both must be swallowed
+    # without arming a re-read.
+    win = _window(app)
+    win._suppress_chain_echo = 2
+    for _ in range(2):  # each burst: assignment events, then chain_changed
+        win._on_device_event({"type": "assignment_changed", "data": {}})
+        win._on_device_event({"type": "chain_changed", "data": {}})
+    assert win._suppress_chain_echo == 0
+    assert win._chain_reread_pending is False
+    assert not win._chain_reread_timer.isActive()

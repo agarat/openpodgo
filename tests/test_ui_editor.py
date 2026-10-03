@@ -174,6 +174,20 @@ def test_toggle_bypass(app):
     assert view.editor.preset.chain[slot].enabled is not was
 
 
+def test_toggle_bypass_syncs_to_pedal(app):
+    # Issue #2: bypass has no punctual vendor op (not RE'd yet), so it is
+    # synced via the complete blob dump (op 21), for ANY block, with or
+    # without a footswitch assignment. The toggled block is selected so the
+    # op 33 refresh targets it.
+    view = _view(app)
+    emitted = []
+    view.chain_write_requested.connect(lambda: emitted.append(True))
+    slot = _slot_of(view, 366)
+    view.toggle_bypass(slot)
+    assert emitted
+    assert view._selected_slot() == slot
+
+
 def test_swap_model_refreshes_chain(app):
     view = _view(app)
     slot = _slot_of(view, 366)
