@@ -18,15 +18,16 @@ trim = true
 conventional_commits = false
 split_commits = false
 commit_parsers = [
-  { message = "^catalog", group = "Catálogo" },
+  { message = "^Merge (pull request|branch)", skip = true },
+  { message = "^catalog", group = "Catalog" },
   { message = "^openpodgo", group = "Core" },
   { message = "^ui", group = "UI" },
   { message = "^build", group = "Build" },
   { message = "^ci", group = "CI" },
-  { message = "^docs", group = "Documentación" },
+  { message = "^docs", group = "Documentation" },
   { message = "^test", group = "Tests" },
   { message = "^fix", group = "Fixes" },
-  { message = ".*", group = "Otros" },
+  { message = ".*", group = "Other" },
 ]
 filter_commits = false
 tag_pattern = "v[0-9]*"
