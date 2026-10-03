@@ -71,6 +71,19 @@ jobs:
           prerelease: false
           files: dist/*
 
+      # action-gh-release only uses target_commitish when it CREATES the tag:
+      # an existing 'latest' must be moved to this commit explicitly.
+      - name: Move 'latest' tag to this commit (main)
+        if: github.ref_type == 'branch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          if gh api "repos/${REPO}/git/ref/tags/latest" >/dev/null 2>&1; then
+            gh api -X PATCH "repos/${REPO}/git/refs/tags/latest" \
+              -f sha="${GITHUB_SHA}" -F force=true
+          fi
+
       - name: Publish rolling 'latest' (main)
         if: github.ref_type == 'branch'
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
