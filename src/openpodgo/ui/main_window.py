@@ -70,7 +70,9 @@ class MainWindow(QMainWindow):
         #: After a reorder initiated by US, the pedal echoes chain_changed.
         #: We already have the correct state in memory, so we drop that echo
         #: instead of re-reading the whole preset (which costs ~5 s of handshakes).
-        self._suppress_chain_echo = False
+        #: A counter, not a flag: queued chain writes can run back-to-back
+        #: before the reader sees their echoes (one echo per write).
+        self._suppress_chain_echo = 0
         #: The next re-read comes from a reorder ON the pedal: we must preserve
         #: selection + ● (#2/#4) instead of resetting them.
         self._chain_reread_pending = False
@@ -367,6 +369,9 @@ class MainWindow(QMainWindow):
             self.editor_view.select_slot(self._chain_reread_to_slot)
         self._chain_reread_pending = False
         self._chain_reread_to_slot = None
+        # A chain write queued against the previous editor must not dump the
+        # freshly loaded preset (nobody edited it).
+        self._chain_write_pending = False
         self._status(
             f"“{state.name}” ({self._slot_text(state.slot)}) — in-memory changes"
         )
@@ -567,7 +572,7 @@ class MainWindow(QMainWindow):
             if ok:
                 # The pedal will echo chain_changed for our own write: we drop
                 # it (we already have the state in memory) so as not to re-read.
-                self._suppress_chain_echo = True
+                self._suppress_chain_echo += 1
                 self._status("Change applied on the pedal ✓")
             else:
                 self.statusBar().showMessage("Error applying the change on the pedal")
@@ -605,7 +610,7 @@ class MainWindow(QMainWindow):
             if self._suppress_chain_echo:
                 # Echo of our own chain write: the in-memory editor is already
                 # up to date, no need to re-read (saves ~5 s of handshakes).
-                self._suppress_chain_echo = False
+                self._suppress_chain_echo -= 1
                 log.info("chain_changed: own echo, dropped (no re-read)")
             else:
                 # Reorder done ON the pedal: arrives as a burst (op 49 {75,76}).
@@ -702,6 +707,8 @@ class MainWindow(QMainWindow):
         worker.start()
 
     def closeEvent(self, event) -> None:
+        # Do not let a worker's cleanup flush a queued write during teardown.
+        self._chain_write_pending = False
         if self._notification_reader is not None:
             self._notification_reader.stop()
             self._notification_reader.wait(1000)
