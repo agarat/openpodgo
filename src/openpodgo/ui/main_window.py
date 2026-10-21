@@ -13,13 +13,15 @@ import logging
 import time
 
 from PySide6.QtCore import QThread, QTimer, Signal
-from PySide6.QtGui import QAction
+from PySide6.QtGui import QAction, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
+    QLineEdit,
     QMainWindow,
     QMessageBox,
     QSplitter,
     QStatusBar,
+    QTextEdit,
 )
 
 from ..device import PodGo
@@ -92,6 +94,19 @@ class MainWindow(QMainWindow):
 
         self._build_ui()
         self._build_menu()
+
+        def _on_ctrl_c():
+            focus = QApplication.focusWidget()
+            if isinstance(focus, (QLineEdit, QTextEdit)) and focus.hasSelectedText():
+                focus.copy()
+            else:
+                self.close()
+
+        self._shortcut_ctrl_c = QShortcut(QKeySequence("Ctrl+C"), self)
+        self._shortcut_ctrl_c.activated.connect(_on_ctrl_c)
+        self._shortcut_ctrl_q = QShortcut(QKeySequence("Ctrl+Q"), self)
+        self._shortcut_ctrl_q.activated.connect(self.close)
+
         if autoconnect:
             self._start_connect()
         else:
@@ -137,6 +152,7 @@ class MainWindow(QMainWindow):
         file_menu.addAction(act_export)
         file_menu.addSeparator()
         act_quit = QAction("&Quit", self)
+        act_quit.setShortcut(QKeySequence.StandardKey.Quit)
         act_quit.triggered.connect(self.close)
         file_menu.addAction(act_quit)
 
@@ -722,12 +738,22 @@ class MainWindow(QMainWindow):
 
 def run() -> int:
     import os
+    import signal
     level = os.environ.get("PODGO_LOGLEVEL", "INFO").upper()
     logging.basicConfig(
         level=getattr(logging, level, logging.INFO),
         format="%(relativeCreated)7.0fms %(levelname)s %(name)s: %(message)s",
     )
+    # Enable terminal Ctrl+C (SIGINT) to terminate process immediately
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+
     app = QApplication.instance() or QApplication([])
+
+    # Let Qt event loop periodically yield so OS signals like SIGINT trigger
+    sig_timer = QTimer()
+    sig_timer.timeout.connect(lambda: None)
+    sig_timer.start(200)
+
     apply_dark_theme(app)
     win = MainWindow()
     win.show()

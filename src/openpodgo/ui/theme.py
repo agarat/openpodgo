@@ -8,14 +8,20 @@ from PySide6.QtWidgets import QApplication
 from . import assets
 from .palette import BACKGROUND
 
-_QSS = f"""
-QWidget {{ background: {BACKGROUND}; color: #e6e6e6; font-size: 13px; }}
-QLabel#title {{ font-size: 17px; font-weight: 600; color: #ffffff; }}
-QLabel#hint {{ color: #8a8f98; font-size: 11px; }}
+import os
+
+def make_qss(scale: float = 1.0) -> str:
+    base = max(10, round(13 * scale))
+    title = max(12, round(17 * scale))
+    hint = max(9, round(11 * scale))
+    return f"""
+QWidget {{ background: {BACKGROUND}; color: #e6e6e6; font-size: {base}px; }}
+QLabel#title {{ font-size: {title}px; font-weight: 600; color: #ffffff; }}
+QLabel#hint {{ color: #8a8f98; font-size: {hint}px; }}
 QSplitter::handle {{ background: #232529; width: 2px; }}
 QListWidget#presetList {{
     background: #1d1f23; border: 1px solid #2a2d31; border-radius: 6px;
-    padding: 2px; font-size: 13px;
+    padding: 2px; font-size: {base}px;
 }}
 QListWidget#presetList::item {{ padding: 4px 8px; border-radius: 3px; }}
 QListWidget#presetList::item:selected {{ background: #3a3f47; color: #ffffff; }}
@@ -54,12 +60,24 @@ QMenuBar::item:selected {{ background: #2a2d31; }}
 """
 
 
-def apply_dark_theme(app: QApplication) -> None:
+def apply_dark_theme(app: QApplication, font_scale: float | None = None) -> None:
+    if font_scale is None:
+        try:
+            font_scale = float(os.environ.get("PODGO_FONT_SCALE", "1.0"))
+        except ValueError:
+            font_scale = 1.0
+
     app.setStyle("Fusion")
     families = assets.load_fonts()
     roboto = next((f for f in families if f == "Roboto"), None)
+    pt_size = max(8, round(10 * font_scale))
     if roboto:
-        app.setFont(QFont(roboto, 10))
+        app.setFont(QFont(roboto, pt_size))
+    else:
+        f = app.font()
+        f.setPointSize(pt_size)
+        app.setFont(f)
+
     pal = QPalette()
     pal.setColor(QPalette.Window, QColor(BACKGROUND))
     pal.setColor(QPalette.Base, QColor("#1d1f23"))
@@ -70,4 +88,4 @@ def apply_dark_theme(app: QApplication) -> None:
     pal.setColor(QPalette.Highlight, QColor("#3a3f47"))
     pal.setColor(QPalette.HighlightedText, QColor("#ffffff"))
     app.setPalette(pal)
-    app.setStyleSheet(_QSS)
+    app.setStyleSheet(make_qss(font_scale))
