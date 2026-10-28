@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || echo "${BASH_SOURCE[0]}")"
+REPO_DIR="$(CDPATH="" cd -- "$(dirname -- "$SCRIPT_PATH")/.." >/dev/null 2>&1 && pwd)"
+exec "${REPO_DIR}/.venv/bin/tonemaker" "$@"

@@ -8,6 +8,7 @@ content reading and writing (Phases 3-4).
 from __future__ import annotations
 
 import logging
+import time
 import zlib
 
 from . import l6helix
@@ -290,10 +291,18 @@ class PodGo:
             if ok:
                 log.info("set_param(blk=%d, idx=%d, val=%.4f) → True", block_index, param_idx, value)
                 return True
-            log.warning("set_param(blk=%d, idx=%d, val=%.4f) → attempt %d failed",
-                        block_index, param_idx, value, attempt + 1)
+            if attempt == 0:
+                log.debug(
+                    "set_param(blk=%d, idx=%d, val=%.4f) → attempt %d failed",
+                    block_index, param_idx, value, attempt + 1,
+                )
+            else:
+                log.warning(
+                    "set_param(blk=%d, idx=%d, val=%.4f) → attempt %d failed",
+                    block_index, param_idx, value, attempt + 1,
+                )
             self._read_since_write = True  # force reconnect on retry
-        log.info("set_param(blk=%d, idx=%d, val=%.4f) → False (after retry)", block_index, param_idx, value)
+        log.warning("set_param(blk=%d, idx=%d, val=%.4f) → False (after retry)", block_index, param_idx, value)
         return False
 
     def set_model(
@@ -319,8 +328,16 @@ class PodGo:
             if ok:
                 log.info("set_model(blk=%d, wire_id=%d) → True", block_index, wire_id)
                 return True
-            log.warning("set_model(blk=%d, wire_id=%d) → attempt %d failed",
-                        block_index, wire_id, attempt + 1)
+            if attempt == 0:
+                log.debug(
+                    "set_model(blk=%d, wire_id=%d) → attempt %d failed",
+                    block_index, wire_id, attempt + 1,
+                )
+            else:
+                log.warning(
+                    "set_model(blk=%d, wire_id=%d) → attempt %d failed",
+                    block_index, wire_id, attempt + 1,
+                )
             self._read_since_write = True  # force reconnect on retry
         log.warning("set_model(blk=%d, wire_id=%d) → False (after retry)",
                     block_index, wire_id)
@@ -353,6 +370,7 @@ class PodGo:
             if ok:
                 self._apply_edit(ws, block_index)
                 log.info("write_chain_blob(%d B) → True", len(blob))
+                self._read_since_write = True  # dump desyncs channel; force fresh session for next op
                 return True
             log.warning("write_chain_blob(%d B) → attempt %d failed", len(blob), attempt + 1)
             self._read_since_write = True  # force reconnect on retry
@@ -366,6 +384,8 @@ class PodGo:
         cursor can desync after previous writes).
         """
         for attempt in range(2):
+            if attempt == 0:
+                time.sleep(0.05)  # hardware settle time
             ws = self._require_write_session()
             resp = ws.send_write(
                 {102: _write_tx_id(), 100: 71,
@@ -375,8 +395,12 @@ class PodGo:
             if ok:
                 log.info("save_preset(setlist=%d, slot=%d, name=%r) → True", setlist, slot, name)
                 return True
-            log.warning("save_preset(setlist=%d, slot=%d, name=%r) → attempt %d failed",
-                        setlist, slot, name, attempt + 1)
+            if attempt == 0:
+                log.debug("save_preset(setlist=%d, slot=%d, name=%r) → attempt %d failed",
+                          setlist, slot, name, attempt + 1)
+            else:
+                log.warning("save_preset(setlist=%d, slot=%d, name=%r) → attempt %d failed",
+                            setlist, slot, name, attempt + 1)
             self._read_since_write = True  # force reconnect on retry
         log.warning("save_preset(setlist=%d, slot=%d, name=%r) → False (after retry)", setlist, slot, name)
         return False

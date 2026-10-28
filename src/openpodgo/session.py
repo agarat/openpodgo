@@ -60,19 +60,21 @@ class Session:
     #: Short timeout for handshake packets: the device ignores the first
     #: post-connection attempt (~50 ms to be ready), so we fail fast and
     #: retry instead of waiting 2 s per packet.
-    HANDSHAKE_TIMEOUT_MS = 300
+    HANDSHAKE_TIMEOUT_MS = 500
 
     def handshake(self) -> None:
         """Execute the 5-packet init with drain + exponential backoff.
 
         The device requires this handshake before each major operation
         (list_setlists, stream_presets, read_object). The first attempt
-        usually fails because the device is still processing the previous
-        response; drain + 300 ms backoff + second attempt always works.
+        may fail if the device is still processing the previous response;
+        drain + backoff + second attempt transparently handles readiness.
         """
         last_exc: Exception | None = None
         for attempt in range(MAX_INIT_ATTEMPTS):
             try:
+                if attempt == 0:
+                    time.sleep(0.04)  # brief settle for hardware endpoint
                 self.transport.drain()
                 for pkt in packets.HANDSHAKE_SEQUENCE:
                     self.transport.request(pkt, timeout_ms=self.HANDSHAKE_TIMEOUT_MS)
@@ -83,10 +85,16 @@ class Session:
             except TransportError as exc:
                 last_exc = exc
                 wait = BACKOFF_BASE_MS * (2 ** attempt)
-                log.warning(
-                    "Handshake attempt %d failed (%s); retrying in %d ms",
-                    attempt + 1, exc, wait,
-                )
+                if attempt == 0:
+                    log.debug(
+                        "Handshake attempt 1 failed (%s); retrying in %d ms",
+                        exc, wait,
+                    )
+                else:
+                    log.warning(
+                        "Handshake attempt %d failed (%s); retrying in %d ms",
+                        attempt + 1, exc, wait,
+                    )
                 time.sleep(wait / 1000.0)
         raise SessionError(
             f"Handshake failed after {MAX_INIT_ATTEMPTS} attempts: {last_exc}"
@@ -173,10 +181,16 @@ class WriteSession:
             except TransportError as exc:
                 last_exc = exc
                 wait = BACKOFF_BASE_MS * (2 ** attempt)
-                log.warning(
-                    "Write handshake attempt %d failed (%s); retrying in %d ms",
-                    attempt + 1, exc, wait,
-                )
+                if attempt == 0:
+                    log.debug(
+                        "Write handshake attempt 1 failed (%s); retrying in %d ms",
+                        exc, wait,
+                    )
+                else:
+                    log.warning(
+                        "Write handshake attempt %d failed (%s); retrying in %d ms",
+                        attempt + 1, exc, wait,
+                    )
                 time.sleep(wait / 1000.0)
         raise SessionError(
             f"Write handshake failed after {MAX_INIT_ATTEMPTS} attempts: {last_exc}"

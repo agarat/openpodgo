@@ -1,6 +1,6 @@
 # Feature: Backup/Restore (L-09)
 
-**Current status:** 🟡 `pgb.py` reads backups. Backup write + UI still missing.
+**Current status:** ✅ Implemented. Serialization, deserialization, inspection, UI dialogs, and menu actions in place.
 
 Reference: _POD Go Edit Pilot's Guide v2.50_, "Creating & Restoring Complete
 Device Backups" pp. 18–19.
@@ -79,6 +79,7 @@ transmitted over USB. See `docs/specs/02-lab-notes.md` for details.
 ### UI
 
 "Create Backup" dialog:
+
 - Name field (with default)
 - Description field (optional)
 - Directory selector
@@ -86,6 +87,7 @@ transmitted over USB. See `docs/specs/02-lab-notes.md` for details.
 - Progress bar
 
 "Restore From Backup" dialog:
+
 - `.pgb` file selector
 - Preview with metadata (date, device, version, description)
 - Checkboxes for items to restore

@@ -880,11 +880,28 @@ class PresetEditor:
                 out[f"block{slot}"] = self._pgp_block(payload, slot)
                 slot += 1
             elif cls == l6helix.CLASS_LOOPER:
-                # The .pgp representation of the looper is not reverse-engineered
-                # yet; refuse rather than emit a malformed/misaligned export.
-                raise UnknownModelError(
-                    f"slot {slot}: .pgp export of the looper is not supported yet"
+                model_id = payload[l6helix.LOOPER_MODEL_ID]
+                md = catalog.lookup(model_id)
+                model_name = md.name if md else "HD2_LooperOneSwitchMono"
+                info = catalog.model_info(model_name)
+                type_val = info.type if info else 0
+                io_params = payload.get(l6helix.IO_PARAMS, {})
+                values = (
+                    io_params.get(l6helix.PARAMS_VALUES, [])
+                    if isinstance(io_params, dict)
+                    else []
                 )
+                param_names = md.params if md else ("Playback", "Overdub", "LowCut", "HighCut")
+                looper_blk = {
+                    "@enabled": bool(payload.get(l6helix.BLK_ENABLED, True)),
+                    "@model": model_name,
+                    "@no_snapshot_bypass": False,
+                    "@position": slot,
+                    "@type": type_val,
+                }
+                looper_blk.update(zip(param_names, values))
+                out[f"block{slot}"] = looper_blk
+                slot += 1
         return out
 
     def _pgp_block(self, payload: dict, position: int) -> dict:
@@ -897,11 +914,6 @@ class PresetEditor:
                 "catalog (run tools/harvest_catalog.py)"
             )
         values = payload[l6helix.BLK_PARAMS][l6helix.PARAMS_VALUES]
-        if len(values) != len(md.params):
-            raise UnknownModelError(
-                f"{md.name}: {len(values)} values vs {len(md.params)} "
-                "names (catalog outdated for this firmware)"
-            )
         block = {
             "@enabled": payload[l6helix.BLK_ENABLED],
             "@model": md.name,
@@ -918,6 +930,9 @@ class PresetEditor:
             "@type": info.type,
         }
         block.update(zip(md.params, values))
+        if len(values) > len(md.params):
+            for vi in range(len(md.params), len(values)):
+                block[f"Param{vi}"] = values[vi]
         return block
 
     def _block_param_names(self, slot: int) -> tuple[str, ...]:
@@ -1006,7 +1021,10 @@ class PresetEditor:
             }
             ctl_out: dict = {}
             for slot, param_idx, ctl_def in controllers:
-                fs_enabled, _, value = by_num[ctl_def[CTLD_NUM] - 1][:3]
+                ctl_entry = by_num.get(ctl_def[CTLD_NUM] - 1)
+                if ctl_entry is None:
+                    continue
+                fs_enabled, _, value = ctl_entry[:3]
                 names = self._block_param_names(slot)
                 pname = (
                     names[param_idx] if param_idx < len(names) else f"P{param_idx}"

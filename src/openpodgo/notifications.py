@@ -212,7 +212,11 @@ class NotificationReader(QThread):
                 break
             try:
                 frames = self._poll_fn()
-            except Exception:  # noqa: BLE001 — a poll failure must not kill the thread
+            except Exception as exc:  # noqa: BLE001 — a poll failure must not kill the thread
+                err_str = str(exc)
+                if "No such device" in err_str or "[Errno 19]" in err_str:
+                    log.info("Device disconnected; stopping event channel listener.")
+                    break
                 log.exception("event channel poll failed")
                 frames = []
             if not frames:

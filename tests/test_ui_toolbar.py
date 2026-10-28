@@ -102,10 +102,142 @@ def test_prev_next_emiten(app):
     assert got == ["prev", "next"]
 
 
-def test_reread_y_export_siguen_en_la_toolbar(app):
+def test_export_y_import_en_la_toolbar(app):
+    view = _view(app)
+    assert view.toolbar.export_btn.isEnabled()
+    assert view.toolbar.import_btn.isEnabled()
+
+
+def test_import_btn_emite_senal(app):
     view = _view(app)
     got = []
-    view.reread_requested.connect(lambda: got.append("reread"))
-    view.toolbar.reread_btn.click()
-    assert got == ["reread"]
-    assert view.toolbar.export_btn.isEnabled()
+    view.import_requested.connect(lambda: got.append("import"))
+    view.toolbar.import_btn.click()
+    assert got == ["import"]
+
+
+def test_rename_preset_in_place_commit(app):
+    from PySide6.QtCore import Qt
+    from PySide6.QtTest import QTest
+
+    view = _view(app)
+    view.show()
+    title = view.toolbar.title_label
+    assert not title._editor.isVisible()
+
+    got = []
+    view.rename_requested.connect(got.append)
+
+    title.start_rename()
+    assert title._editor.isVisible()
+    assert title._editor.text() == "BassPreset"
+
+    title._editor.setText("My New Tone")
+    QTest.keyClick(title._editor, Qt.Key.Key_Return)
+
+    assert not title._editor.isVisible()
+    assert got == ["My New Tone"]
+    assert "My New Tone" in title.text()
+
+
+def test_rename_preset_in_place_cancel_escape(app):
+    from PySide6.QtCore import Qt
+    from PySide6.QtTest import QTest
+
+    view = _view(app)
+    view.show()
+    title = view.toolbar.title_label
+
+    got = []
+    view.rename_requested.connect(got.append)
+
+    title.start_rename()
+    assert title._editor.isVisible()
+
+    title._editor.setText("Discard Me")
+    QTest.keyClick(title._editor, Qt.Key.Key_Escape)
+
+    assert not title._editor.isVisible()
+    assert got == []
+    assert "BassPreset" in title.text()
+
+
+def test_rename_preset_double_click_triggers_edit(app):
+    from PySide6.QtCore import Qt
+    from PySide6.QtTest import QTest
+
+    view = _view(app)
+    view.show()
+    title = view.toolbar.title_label
+    assert not title._editor.isVisible()
+
+    QTest.mouseDClick(title, Qt.MouseButton.LeftButton)
+    assert title._editor.isVisible()
+
+
+def test_preset_title_drag_and_drop_pgp(app, tmp_path):
+    from PySide6.QtCore import QMimeData, QUrl, QPointF, Qt
+    from PySide6.QtGui import QDragEnterEvent, QDragMoveEvent, QDropEvent
+
+    view = _view(app)
+    view.show()
+    title = view.toolbar.title_label
+
+    pgp_file = tmp_path / "dragged.pgp"
+    pgp_file.write_text("{}")
+
+    mime = QMimeData()
+    mime.setUrls([QUrl.fromLocalFile(str(pgp_file))])
+
+    enter_ev = QDragEnterEvent(
+        QPointF(10.0, 10.0),
+        Qt.DropAction.CopyAction,
+        mime,
+        Qt.MouseButton.LeftButton,
+        Qt.KeyboardModifier.NoModifier,
+    )
+    title.dragEnterEvent(enter_ev)
+    assert enter_ev.isAccepted()
+
+    move_ev = QDragMoveEvent(
+        QPointF(10.0, 10.0),
+        Qt.DropAction.CopyAction,
+        mime,
+        Qt.MouseButton.LeftButton,
+        Qt.KeyboardModifier.NoModifier,
+    )
+    title.dragMoveEvent(move_ev)
+    assert move_ev.isAccepted()
+
+    # Drop event on title label forwards to view.file_dropped
+    dropped = []
+    view.file_dropped.connect(dropped.append)
+
+    drop_ev = QDropEvent(
+        QPointF(10.0, 10.0),
+        Qt.DropAction.CopyAction,
+        mime,
+        Qt.MouseButton.LeftButton,
+        Qt.KeyboardModifier.NoModifier,
+    )
+    title.dropEvent(drop_ev)
+    assert drop_ev.isAccepted()
+    assert dropped == [str(pgp_file)]
+
+    # Non-pgp rejection
+    txt_file = tmp_path / "other.txt"
+    txt_file.write_text("not a preset")
+    mime_bad = QMimeData()
+    mime_bad.setUrls([QUrl.fromLocalFile(str(txt_file))])
+
+    enter_bad = QDragEnterEvent(
+        QPointF(10.0, 10.0),
+        Qt.DropAction.CopyAction,
+        mime_bad,
+        Qt.MouseButton.LeftButton,
+        Qt.KeyboardModifier.NoModifier,
+    )
+    title.dragEnterEvent(enter_bad)
+    assert not enter_bad.isAccepted()
+
+

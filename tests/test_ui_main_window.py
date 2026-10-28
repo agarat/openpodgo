@@ -225,3 +225,131 @@ def test_eco_de_dos_chain_writes_seguidos_no_dispara_reread(app):
     assert win._suppress_chain_echo == 0
     assert win._chain_reread_pending is False
     assert not win._chain_reread_timer.isActive()
+
+
+def test_shortcuts_ctrl_q(app):
+    from PySide6.QtGui import QAction, QKeySequence
+
+    win = _window(app)
+    assert not hasattr(win, "_shortcut_ctrl_c")
+    assert not hasattr(win, "_shortcut_ctrl_q")
+
+    # Quit shortcut is bound to File -> Quit action without duplicate overload
+    quit_act = next(a for a in win.findChildren(QAction) if a.text() == "&Quit")
+    assert quit_act.shortcut() == QKeySequence.StandardKey.Quit
+
+    closed = []
+    quit_act.triggered.connect(lambda: closed.append(True))
+    quit_act.trigger()
+    assert closed == [True]
+
+
+def test_cli_log_level_flags(monkeypatch):
+    import logging
+    from openpodgo.ui.main_window import _get_log_level, _parse_args
+
+    monkeypatch.delenv("PODGO_LOGLEVEL", raising=False)
+
+    # Defaults to WARNING (not chatty)
+    args_default = _parse_args([])
+    assert _get_log_level(args_default) == logging.WARNING
+
+    # --verbose / -v -> INFO
+    args_verbose = _parse_args(["-v"])
+    assert _get_log_level(args_verbose) == logging.INFO
+
+    # --debug / -d -> DEBUG
+    args_debug = _parse_args(["--debug"])
+    assert _get_log_level(args_debug) == logging.DEBUG
+
+    # --quiet / -q -> ERROR
+    args_quiet = _parse_args(["-q"])
+    assert _get_log_level(args_quiet) == logging.ERROR
+
+    # Environment variable override when no flag provided
+    monkeypatch.setenv("PODGO_LOGLEVEL", "INFO")
+    assert _get_log_level(args_default) == logging.INFO
+
+
+def test_preset_menu_and_busy_cursor(app):
+    win = _window(app)
+
+    # Check Preset menu exists and has the expected actions
+    menus = {a.text(): a.menu() for a in win.menuBar().actions() if a.menu()}
+    assert "&Preset" in menus
+    preset_actions = [a.text().replace("&", "") for a in menus["&Preset"].actions() if not a.isSeparator()]
+    assert any("Rename" in t for t in preset_actions)
+    assert any("Import" in t for t in preset_actions)
+    assert any("Export" in t for t in preset_actions)
+    assert any("Reset" in t for t in preset_actions)
+
+    # Test busy cursor stack
+    assert win._busy_depth == 0
+    win._push_busy()
+    assert win._busy_depth == 1
+    assert QApplication.overrideCursor() is not None
+    win._push_busy()
+    assert win._busy_depth == 2
+    win._pop_busy()
+    assert win._busy_depth == 1
+    win._pop_busy()
+    assert win._busy_depth == 0
+
+
+def test_export_presets_zip_all_slots(app, tmp_path, monkeypatch):
+    import zipfile
+    from PySide6.QtWidgets import QFileDialog, QMessageBox
+    from openpodgo.preset import PresetEntry
+
+    win = _window(app)
+    presets = [PresetEntry(slot=i, name="Clean Solo" if i == 0 else f"Tone {i:02d}", index=i) for i in range(128)]
+    win.librarian.set_presets(presets)
+
+    zip_path = tmp_path / "all_presets.zip"
+    monkeypatch.setattr(QFileDialog, "getSaveFileName", lambda *args, **kwargs: (str(zip_path), "Zip Archive (*.zip)"))
+    monkeypatch.setattr(QMessageBox, "information", lambda *args, **kwargs: None)
+
+    win._export_presets_zip()
+
+    # The background worker runs
+    app.processEvents()
+    for _ in range(50):
+        if zip_path.exists() and not win._workers:
+            break
+        app.processEvents()
+        import time
+        time.sleep(0.01)
+
+    assert zip_path.exists()
+    with zipfile.ZipFile(zip_path, "r") as zf:
+        names = zf.namelist()
+        assert len(names) == 128
+        # None of the files should be in a user/ folder
+        assert all(not n.startswith("user/") and not n.startswith("User/") for n in names)
+        # Check actual preset names with spaces converted to underscores
+        assert names[0] == "01A_Clean_Solo.pgp"
+        assert names[1] == "01B_Tone_01.pgp"
+        assert names[-1] == "32D_Tone_127.pgp"
+
+
+def test_drop_pgp_triggers_import(app, monkeypatch):
+    win = _window(app)
+    pgp_path = CAPS / "spec02_a.pgp"
+
+    imported = []
+    monkeypatch.setattr(
+        win,
+        "_load_and_save_pgp_to_slot",
+        lambda slot, pgp: imported.append((slot, pgp.get("meta", {}).get("name"))),
+    )
+
+    # Signal from librarian list drop onto slot 3
+    win.librarian.preset_dropped.emit(3, str(pgp_path))
+    assert len(imported) == 1
+    assert imported[0][0] == 3
+
+    # Signal from editor title drop onto loaded slot 7
+    win.librarian.set_loaded(7)
+    win.editor_view.file_dropped.emit(str(pgp_path))
+    assert len(imported) == 2
+    assert imported[1][0] == 7

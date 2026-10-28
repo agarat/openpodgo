@@ -330,15 +330,20 @@ def ui_image(name: str, frame: int = 0) -> QPixmap | None:
 
 @lru_cache(maxsize=1)
 def load_fonts() -> tuple[str, ...]:
-    """Registers fonts from res/fonts; returns the loaded families."""
-    root = res_root()
-    if root is None:
-        return ()
+    """Registers fonts from bundled fonts/ and res/fonts; returns the loaded families."""
     families: list[str] = []
-    for path in sorted((root / "fonts").glob("*")):
-        if path.suffix.lower() not in (".ttf", ".otf", ".ttc"):
-            continue
-        font_id = QFontDatabase.addApplicationFont(str(path))
-        if font_id >= 0:
-            families.extend(QFontDatabase.applicationFontFamilies(font_id))
+    bundled_fonts = Path(__file__).parent / "fonts"
+    if bundled_fonts.is_dir():
+        for path in sorted(bundled_fonts.glob("*")):
+            if path.suffix.lower() in (".ttf", ".otf", ".ttc"):
+                font_id = QFontDatabase.addApplicationFont(str(path))
+                if font_id >= 0:
+                    families.extend(QFontDatabase.applicationFontFamilies(font_id))
+    root = res_root()
+    if root is not None:
+        for path in sorted((root / "fonts").glob("*")):
+            if path.suffix.lower() in (".ttf", ".otf", ".ttc"):
+                font_id = QFontDatabase.addApplicationFont(str(path))
+                if font_id >= 0:
+                    families.extend(QFontDatabase.applicationFontFamilies(font_id))
     return tuple(dict.fromkeys(families))

@@ -37,8 +37,10 @@ from .toolbar import EditorToolbar
 class EditorView(QWidget):
     """Active preset editor: toolbar + chain + inspector + .pgp export."""
 
-    reread_requested = Signal()
     save_requested = Signal()
+    import_requested = Signal()
+    rename_requested = Signal(str)
+    file_dropped = Signal(str)
     snapshot_selected = Signal(int)
     prev_requested = Signal()
     next_requested = Signal()
@@ -70,9 +72,11 @@ class EditorView(QWidget):
         self.toolbar.snapshot_selected.connect(self._snapshot_clicked)
         self.toolbar.undo_requested.connect(self.undo)
         self.toolbar.redo_requested.connect(self.redo)
-        self.toolbar.reread_requested.connect(self.reread_requested)
+        self.toolbar.import_requested.connect(self.import_requested)
         self.toolbar.export_requested.connect(self._export_dialog)
         self.toolbar.save_requested.connect(self.save_requested)
+        self.toolbar.rename_requested.connect(self.rename_requested)
+        self.toolbar.file_dropped.connect(self.file_dropped)
         root.addWidget(self.toolbar)
         QShortcut(QKeySequence.Undo, self, activated=self.undo)
         QShortcut(QKeySequence.Redo, self, activated=self.redo)
@@ -232,6 +236,15 @@ class EditorView(QWidget):
         """Marks the preset as saved: clears the modification indicator (●)."""
         self.modified = False
         self.toolbar.set_title(self.slot_text, self.preset_name, False)
+
+    def set_preset_name(self, name: str) -> None:
+        """Updates the active preset name and refreshes toolbar title."""
+        self.preset_name = name
+        self.toolbar.set_title(self.slot_text, self.preset_name, self.modified)
+
+    def start_rename(self) -> None:
+        """Initiates in-place renaming of the preset in the editor toolbar."""
+        self.toolbar.start_rename()
 
     # --- undo/redo ---
 

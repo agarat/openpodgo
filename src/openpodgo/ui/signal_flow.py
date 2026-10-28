@@ -110,7 +110,7 @@ class BlockWidget(QWidget):
                 self._display = f"Modelo {block.model_id}"
             self.block_enabled = block.enabled
             self.setToolTip(
-                f"{self._display} — doble click: bypass"
+                f"{self._display} — double-click: bypass"
                 + (f" ({assign_label})" if assign_label else "")
             )
         self.update()

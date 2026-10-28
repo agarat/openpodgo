@@ -40,7 +40,7 @@ PodGo Lab code (June 2026).
 | L-06 | Import preset (.pgp) | ✅ | `editor.from_pgp()` |
 | L-07 | Export preset (.pgp) | ✅ | `editor.to_pgp()`, round-trip validated |
 | L-08 | **IR Library** (128 slots + import/export .wav/.hir) | ❌ | No code or spec yet. .hir format = header + IR data. |
-| L-09 | **Backup/Restore** (.pgb) | 🟡 | `pgb.py` reads backups. Backup write + UI missing. |
+| L-09 | **Backup/Restore** (.pgb) | ✅ | Serialization, inspection, UI dialogs, and menu integration complete. |
 
 ---
 

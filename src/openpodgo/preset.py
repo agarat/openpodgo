@@ -336,3 +336,211 @@ def save_pgp(data: dict, path: str | Path) -> None:
     Path(path).write_text(
         json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8"
     )
+
+
+def new_preset_dict(name: str = "New Preset") -> dict:
+    """Return a dictionary matching a factory clean 'New Preset' in Line 6 .pgp format."""
+    return {
+        "data": {
+            "device": 2162695,
+            "device_version": 33619968,
+            "meta": {
+                "application": "POD Go Edit",
+                "appversion": 33554432,
+                "build_sha": "v1.30-41-gaa2725f",
+                "modifieddate": 0,
+                "name": name,
+            },
+            "tone": {
+                "controller": {
+                    "dsp0": {
+                        "block1": {
+                            "Pedal": {
+                                "@controller": 2,
+                                "@max": 1.0,
+                                "@min": 0.0,
+                            }
+                        },
+                        "block2": {
+                            "Pedal": {
+                                "@controller": 1,
+                                "@max": 1.0,
+                                "@min": 0.0,
+                            }
+                        },
+                    }
+                },
+                "dsp0": {
+                    "input": {
+                        "@input": 1,
+                        "@model": "P34_AppDSPFlowInput",
+                        "decay": 0.5,
+                        "noiseGate": False,
+                        "threshold": -48.0,
+                    },
+                    "block0": {
+                        "@enabled": False,
+                        "@model": "HD2_FXLoopMono1",
+                        "@no_snapshot_bypass": False,
+                        "@position": 0,
+                        "@trails": False,
+                        "@type": 5,
+                        "Mix": 1.0,
+                        "Return": 0.0,
+                        "Send": 0.0,
+                    },
+                    "block1": {
+                        "@enabled": False,
+                        "@model": "HD2_VolPanVolStereo",
+                        "@no_snapshot_bypass": False,
+                        "@position": 1,
+                        "@type": 0,
+                        "Pedal": 0.0,
+                        "VolumeTaper": False,
+                    },
+                    "block2": {
+                        "@enabled": False,
+                        "@model": "HD2_WahFasselStereo",
+                        "@no_snapshot_bypass": False,
+                        "@position": 2,
+                        "@type": 0,
+                        "FcHigh": 2200.0,
+                        "FcLow": 455.0,
+                        "Level": 0.0,
+                        "Mix": 1.0,
+                        "Pedal": 1.0,
+                    },
+                    "block3": {"@position": 3},
+                    "block4": {"@position": 4},
+                    "block5": {"@position": 5},
+                    "block6": {"@position": 6},
+                    "block7": {
+                        "@bypassvolume": 1.0,
+                        "@enabled": True,
+                        "@model": "HD2_AmpMandarin80",
+                        "@no_snapshot_bypass": False,
+                        "@position": 7,
+                        "@type": 1,
+                        "Bass": 0.5,
+                        "Bias": 0.5,
+                        "BiasX": 0.5,
+                        "ChVol": 0.8,
+                        "Drive": 0.5,
+                        "FAC": 0,
+                        "Hum": 0.5,
+                        "Master": 1.0,
+                        "Mid": 0.5,
+                        "Presence": 0.5,
+                        "Ripple": 0.5,
+                        "Sag": 0.5,
+                        "Treble": 0.5,
+                    },
+                    "block8": {
+                        "@enabled": True,
+                        "@mic": 0,
+                        "@model": "HD2_Cab4x12MandarinEM",
+                        "@no_snapshot_bypass": False,
+                        "@position": 8,
+                        "@type": 2,
+                        "Distance": 1.0,
+                        "EarlyReflections": 0.0,
+                        "HighCut": 20000.0,
+                        "Level": 0.0,
+                        "LowCut": 20.0,
+                    },
+                    "block9": {
+                        "@enabled": True,
+                        "@model": "HD2_EQ_STATIC_ParametricStereo",
+                        "@no_snapshot_bypass": False,
+                        "@position": 9,
+                        "@type": 0,
+                        "HighCut": 20000.0,
+                        "HighFreq": 8000.0,
+                        "HighGain": 0.0,
+                        "HighQ": 0.7,
+                        "Level": 0.0,
+                        "LowCut": 20.0,
+                        "LowFreq": 100.0,
+                        "LowGain": 0.0,
+                        "LowQ": 0.7,
+                        "MidFreq": 1000.0,
+                        "MidGain": 0.0,
+                        "MidQ": 0.7,
+                    },
+                    "output": {
+                        "@model": "P34_AppDSPFlowOutput",
+                        "@output": 1,
+                        "gain": 0.0,
+                        "pan": 0.5,
+                    },
+                },
+                "dsp1": {},
+                "footswitch": {
+                    "dsp0": {
+                        "block0": {
+                            "@fs_enabled": False,
+                            "@fs_index": 2,
+                            "@fs_label": "FX Loop",
+                            "@fs_ledcolor": 462860,
+                            "@fs_momentary": False,
+                            "@fs_primary": True,
+                        },
+                        "block1": {
+                            "@fs_enabled": False,
+                            "@fs_index": 9,
+                            "@fs_label": "Volume Pedal",
+                            "@fs_ledcolor": 3334,
+                            "@fs_momentary": False,
+                        },
+                        "block2": {
+                            "@fs_enabled": False,
+                            "@fs_index": 9,
+                            "@fs_label": "Wah",
+                            "@fs_ledcolor": 196619,
+                            "@fs_momentary": False,
+                        },
+                        "block9": {
+                            "@fs_enabled": True,
+                            "@fs_index": 1,
+                            "@fs_label": "EQ",
+                            "@fs_ledcolor": 527360,
+                            "@fs_momentary": False,
+                            "@fs_primary": True,
+                        },
+                    }
+                },
+                "global": {
+                    "@current_snapshot": 0,
+                    "@tempo": 120.0,
+                    "@topology0": "A",
+                },
+                "snapshot0": {
+                    "@custom_name": False,
+                    "@ledcolor": 0,
+                    "@name": "SNAPSHOT 1",
+                    "@valid": True,
+                },
+                "snapshot1": {
+                    "@custom_name": False,
+                    "@ledcolor": 0,
+                    "@name": "SNAPSHOT 2",
+                    "@valid": True,
+                },
+                "snapshot2": {
+                    "@custom_name": False,
+                    "@ledcolor": 0,
+                    "@name": "SNAPSHOT 3",
+                    "@valid": True,
+                },
+                "snapshot3": {
+                    "@custom_name": False,
+                    "@ledcolor": 0,
+                    "@name": "SNAPSHOT 4",
+                    "@valid": True,
+                },
+            },
+        },
+        "schema": "L6Preset",
+        "version": 6,
+    }
+
