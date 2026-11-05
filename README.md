@@ -4,8 +4,7 @@
 
 openpodgo talks to the pedal over the Helix/HX family's USB **vendor protocol**
 (bulk transfers + presets in MessagePack), reverse-engineered by the community
-and adapted to the POD Go (`0e41:4247`). It runs where the official editor does
-not: Linux, and natively on macOS.
+and adapted to the POD Go (`0e41:4247`). It runs on Linux and macOS.
 
 ## Screenshots
 
@@ -99,7 +98,7 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 MIDI uses ALSA through `amidi`, so `alsa-utils` must be installed
 (`sudo apt install alsa-utils`).
 
-**macOS** — install libusb, which pyusb needs and which is not bundled:
+**macOS** — install libusb if it is not already available: 
 
 ```bash
 brew install libusb

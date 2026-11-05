@@ -47,7 +47,7 @@ for slot in range(min(3, len(pre.chain))):
     except ValueError:
         continue
     for i in range(min(2, len(block.params))):
-        ok = pod.set_param(block_index=blk_idx, param_idx=i, value=block.params[i])
+        ok = pod.set_param(block_index=blk_idx, param_idx=i, value=float(block.params[i]))
         print(f"  slot={slot} idx={i} blk_idx={blk_idx} → {ok}")
 
 # Check the WriteSession state
@@ -74,7 +74,7 @@ for slot in range(min(2, len(pre.chain))):
     except ValueError:
         continue
     for i in range(min(1, len(block.params))):
-        ok = pod.set_param(block_index=blk_idx, param_idx=i, value=block.params[i])
+        ok = pod.set_param(block_index=blk_idx, param_idx=i, value=float(block.params[i]))
         print(f"  slot={slot} idx={i} → {ok}")
 
 pod.disconnect()
