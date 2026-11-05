@@ -73,9 +73,14 @@ class Session:
         last_exc: Exception | None = None
         for attempt in range(MAX_INIT_ATTEMPTS):
             try:
-                self.transport.drain()
-                for pkt in packets.HANDSHAKE_SEQUENCE:
-                    self.transport.request(pkt, timeout_ms=self.HANDSHAKE_TIMEOUT_MS)
+                # Locked: the drain clears the whole IN endpoint, and another
+                # channel's response arriving meanwhile must not be consumed.
+                with self.transport.lock:
+                    self.transport.drain()
+                    for pkt in packets.HANDSHAKE_SEQUENCE:
+                        self.transport.request(
+                            pkt, timeout_ms=self.HANDSHAKE_TIMEOUT_MS
+                        )
                 self._seq = packets.FIRST_APP_SEQ
                 self._open = True
                 log.info("Handshake completed (attempt %d)", attempt + 1)
@@ -152,16 +157,21 @@ class WriteSession:
         WRITE_OPEN_2 cursor plus its response advance (the device responds
         with object 76). After that set_param works without having to dump
         the full preset via the write channel.
+
+        Holds the transport lock for the whole sequence: the IN endpoint is
+        shared with the read and event channels, so a concurrent event poll
+        between two handshake packets would steal a response.
         """
         open2_cursor = int.from_bytes(self.WRITE_OPEN_2[12:16], "little")
         last_exc: Exception | None = None
         for attempt in range(MAX_INIT_ATTEMPTS):
             try:
-                self.transport.drain()  # clear residual keepalives from the read channel
-                resp = b""
-                for pkt in (self.WRITE_HANDSHAKE, self.WRITE_OPEN_1,
-                            self.WRITE_CHUNK_1, self.WRITE_OPEN_2):
-                    resp = self.transport.request(pkt)
+                with self.transport.lock:
+                    self.transport.drain()  # clear residual keepalives
+                    resp = b""
+                    for pkt in (self.WRITE_HANDSHAKE, self.WRITE_OPEN_1,
+                                self.WRITE_CHUNK_1, self.WRITE_OPEN_2):
+                        resp = self.transport.request(pkt)
                 self._seq = 0x05
                 self._cursor = open2_cursor + packets.write_cursor_advance(resp)
                 self._open = True
@@ -193,26 +203,40 @@ class WriteSession:
     def send_write(self, payload: dict, cmd: int = 0x04) -> bytes:
         """Send a write command at the current cursor and return its echoed status.
 
-        The device autonomously responds with several frames: 16 B acks
-        (cmd=0x10/0x08, no status) and a framed echo of ~48 B with
-        `{102, 103, 104}` that carries the status. ALL must be drained:
-        leaving one unread desynchronizes the next command (it reads the old
-        response). Advances the cursor by the request footprint (8 + body_len);
-        keeping it synchronized is what makes the device apply the change
-        instead of just ACKing it.
+        The device responds with several frames: a framed echo of ~48 B with
+        `{102, 103, 104}` that carries the status, and 16 B acks
+        (cmd=0x10/0x08) without one. Measured on the pedal: the echo arrives in
+        ~2 ms and the acks ~100-250 ms later, so waiting for the acks costs
+        ~250 ms (one timeout) PER WRITE — a 50-parameter save took ~23 s.
+
+        The echo repeats the command's tx id (k102), so the drain stops at OUR
+        echo and does not wait for the acks: they hold no status, the next
+        drain consumes them, and anything left over on the IN endpoint is
+        discarded by the channel filter of the read path. Advances the cursor by
+        the request footprint (8 + body_len); keeping it synchronized is what
+        makes the device apply the change instead of just ACKing it.
         """
         seq = self.advance_seq()
         pkt = packets.build_vendor_write(payload, seq=seq, cmd=cmd, cursor=self._cursor)
-        self.transport.write(pkt)
         self._cursor += 8 + int.from_bytes(pkt[20:22], "little")
+        tx_id = payload.get(102)
         echo = b""
-        while True:
-            try:
-                resp = self.transport.read(self.WRITE_DRAIN_MS)
-            except TransportError:
-                break
-            if len(resp) > 24 and resp[16:20] in packets.WRITE_FRAMED_SUBHEADERS:
-                echo = resp  # the framed frame carries the status
+        # The lock spans write + drain: an event poll running in between would
+        # read (and steal) this command's echo, making the write fail.
+        with self.transport.lock:
+            self.transport.write(pkt)
+            while True:
+                try:
+                    resp = self.transport.read(self.WRITE_DRAIN_MS)
+                except TransportError:
+                    break
+                if len(resp) > 24 and resp[16:20] in packets.WRITE_FRAMED_SUBHEADERS:
+                    echo = resp  # the framed frame carries the status
+                    body = packets.decode_open_body(resp)
+                    if tx_id is None or (
+                        isinstance(body, dict) and body.get(102) == tx_id
+                    ):
+                        break
         return echo
 
     def send_write_chunked(self, payload: dict, cmd: int = 0x04) -> bytes:
@@ -238,17 +262,20 @@ class WriteSession:
         log.debug("send_write_chunked: %d frames, %d B body, cursor=%#08x",
                   len(frames), len(body), self._cursor)
         echo = b""
-        for i, frame in enumerate(frames):
-            log.debug("  OUT[%d] %s", i, _frame_desc(frame))
-            self.transport.write(frame)
-            while True:
-                try:
-                    resp = self.transport.read(self.WRITE_CHUNK_DRAIN_MS)
-                except TransportError:
-                    break
-                log.debug("  IN      %s", _frame_desc(resp))
-                if len(resp) > 24 and resp[16:20] in packets.WRITE_FRAMED_SUBHEADERS:
-                    echo = resp
+        # One lock for the whole dump: the frames belong to one message and a
+        # concurrent event poll could read them as its own responses.
+        with self.transport.lock:
+            for i, frame in enumerate(frames):
+                log.debug("  OUT[%d] %s", i, _frame_desc(frame))
+                self.transport.write(frame)
+                while True:
+                    try:
+                        resp = self.transport.read(self.WRITE_CHUNK_DRAIN_MS)
+                    except TransportError:
+                        break
+                    log.debug("  IN      %s", _frame_desc(resp))
+                    if len(resp) > 24 and resp[16:20] in packets.WRITE_FRAMED_SUBHEADERS:
+                        echo = resp
         self._cursor += 8 + len(body)
         log.debug("send_write_chunked: fin, echo len=%d", len(echo))
         return echo
@@ -299,10 +326,11 @@ class EventSession:
         last_exc: Exception | None = None
         for attempt in range(MAX_INIT_ATTEMPTS):
             try:
-                self.transport.drain()
-                for pkt in (packets.EVENT_HANDSHAKE, packets.EVENT_OPEN,
-                            packets.EVENT_CHUNK):
-                    self.transport.request(pkt)
+                with self.transport.lock:
+                    self.transport.drain()
+                    for pkt in (packets.EVENT_HANDSHAKE, packets.EVENT_OPEN,
+                                packets.EVENT_CHUNK):
+                        self.transport.request(pkt)
                 self._seq = 0x04
                 self._cursor = packets.EVENT_REST_CURSOR
                 self._open = True

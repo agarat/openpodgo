@@ -1,8 +1,8 @@
 # PodGo Lab — Roadmap and pending specs
 
 At-a-glance status (June 2026). The project is a clone of POD Go Edit for
-Linux that speaks the USB vendor protocol of the Helix/HX family. What already
-works and what's missing, with actionable specs to pick up.
+Linux and macOS that speaks the USB vendor protocol of the Helix/HX family.
+What already works and what's missing, with actionable specs to pick up.
 
 ## ✅ Done and validated against real POD Go (0e41:4247)
 
@@ -12,8 +12,10 @@ works and what's missing, with actionable specs to pick up.
   `src/openpodgo/preset.py`.
 - High-level `PodGo` API (`connect`, `list_setlists`, `list_presets`).
   Code: `src/openpodgo/device.py`.
-- MIDI via ALSA/`amidi` (PC, CC32 setlist, snapshots, FS, tap).
-  Code: `src/openpodgo/midi.py`.
+- MIDI via ALSA/`amidi` on Linux and CoreMIDI on macOS (PC, CC32 setlist,
+  snapshots, FS, tap). Code: `src/openpodgo/midi.py` + `midi_{alsa,coremidi}.py`.
+- Platform seams (OS detection, libusb lookup, hints): `src/openpodgo/platform_support.py`.
+  See [10-macos-support.md](10-macos-support.md).
 - PySide6 UI (preset browser, dark theme). Code: `src/openpodgo/ui/`.
 - **Factory and User setlists: complete listing (slots 0-127) + recall by click,
   correct.** The slot is the position in the stream; the index is a stable ID
@@ -70,7 +72,8 @@ Pending **with pedal connected** (close the app first):
 | 7 | 2-value params as combobox (TODO #5) | [07-two-value-params-combobox.md](07-two-value-params-combobox.md) | ✅ resolved: ParamRow with QComboBox for bools/discrete + QCheckBox fallback, 5 tests |
 | 8 | Effects EQ vs Preset EQ (model subset + icons, Acoustic Sim) | [2026-06-14-spec08-effects-eq-vs-preset-eq-design.md](../superpowers/specs/2026-06-14-spec08-effects-eq-vs-preset-eq-design.md) | ✅ resolved (code + offline tests). Pending live verification. |
 | 9 | Bypass/Controller Assignment (window + assignments; S-08/I-04/I-05) | [09-bypass-control-assign.md](09-bypass-control-assign.md) | ✅ resolved (offline): bypass with full CRUD (create/move/clear + label/color, `.pgp` round-trip), controllers with display + Min/Max + clear; `BypassControlPanel` + Ctrl+B toggle + Bypass Assign submenu. **Creating controllers/snapshot-assign on arbitrary params remains RE-blocked** (destination block does not travel in `body[4]`): pending harvest with pedal. |
-
+| 10 | macOS support (CoreMIDI backend, libusb lookup, platform hints) | [10-macos-support.md](10-macos-support.md) | ✅ resolved: `platform_support.py` + `midi_{alsa,coremidi}.py`, verified live on macOS (USB read + CoreMIDI send), offline tests, macOS job in CI. |
+| 11 | Parameter writes from the UI (knob → pedal) | [11-param-write-pipeline.md](11-param-write-pipeline.md) | ✅ resolved (live): typed values (int/float on-wire type), bools skipped (op 30 rejects them), coalesced write on every change, save flushes the editor first, failures shown in the status bar; drain stops at the command echo and writes hold the transport lock (~20 ms/write). |
 ## How to pick up (quick setup)
 
 ```bash
@@ -80,9 +83,10 @@ python tools/probe.py            # with pedal: handshake + Factory list
 python -m openpodgo.app           # the UI
 ```
 
-Hardware requirements: POD Go connected via USB and udev rule installed
-(`99-podgo.rules` in `/etc/udev/rules.d/`, already done). Only one process can
-hold the USB interface at a time (close the app before running tools).
+Hardware requirements: POD Go connected via USB. Linux needs the udev rule
+installed (`99-podgo.rules` in `/etc/udev/rules.d/`) and `alsa-utils`; macOS
+only needs `brew install libusb` (MIDI goes through CoreMIDI). Only one process
+can hold the USB interface at a time (close the app before running tools).
 
 ## Method notes (important for RE)
 

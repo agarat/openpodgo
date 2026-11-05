@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
     QStatusBar,
 )
 
+from .. import platform_support
 from ..device import PodGo
 from ..editor import PresetEditor
 from ..midi import MidiError, MidiOut
@@ -114,6 +115,7 @@ class MainWindow(QMainWindow):
         self.editor_view.bypass_midi_sent.connect(self._on_bypass_midi)
         self.editor_view.snapshot_selected.connect(self._on_snapshot)
         self.editor_view.chain_write_requested.connect(self._write_chain_to_pedal)
+        self.editor_view.write_failed.connect(self._on_write_failed)
         self.editor_view.prev_requested.connect(lambda: self._step_preset(-1))
         self.editor_view.next_requested.connect(lambda: self._step_preset(+1))
 
@@ -137,6 +139,8 @@ class MainWindow(QMainWindow):
         file_menu.addAction(act_export)
         file_menu.addSeparator()
         act_quit = QAction("&Quit", self)
+        # QuitRole moves this item into the application menu on macOS.
+        act_quit.setMenuRole(QAction.QuitRole)
         act_quit.triggered.connect(self.close)
         file_menu.addAction(act_quit)
 
@@ -220,11 +224,17 @@ class MainWindow(QMainWindow):
 
     def _on_failed(self, msg: str) -> None:
         # No modal (the app must be usable without a pedal): offline state in the
-        # Librarian + detail in the status bar.
+        # Librarian + detail in the status bar. The advice under it is the
+        # platform's (udev on Linux, libusb/exclusive access on macOS).
         self.librarian.set_offline(True)
         self.statusBar().showMessage(
-            f"Not connected — {msg} · Is the pedal on? Is the udev rule applied?"
+            f"Not connected — {msg} · Is the pedal on? {platform_support.usb_hint()}."
         )
+
+    def _on_write_failed(self, msg: str) -> None:
+        """A parameter written from the editor was not accepted by the pedal."""
+        log.warning("Write to the pedal failed: %s", msg)
+        self.statusBar().showMessage(f"Not written to the pedal — {msg}")
 
     # --- setlists/presets ---
 
@@ -478,9 +488,11 @@ class MainWindow(QMainWindow):
     def _flush_editor_params(device, editor) -> bool:
         """Send all of the editor's parameters to the pedal via set_param.
 
-        Does not include bypass or model — continuous parameters only. Does not
-        abort on individual failures: it logs and continues. Returns True
-        (best-effort).
+        Used before saving (a save stores the PEDAL's edit buffer) and by the
+        import flow. Each value keeps the type the editor stores, which is the
+        one the pedal accepts; bools are skipped (op 30 rejects them, see
+        `device.set_param`). Does not include bypass or model. Does not abort on
+        individual failures: it logs and continues. Returns True (best-effort).
         """
         log.info("Sending the editor's parameters to the pedal…")
         ok_count = 0
@@ -494,7 +506,9 @@ class MainWindow(QMainWindow):
             except ValueError:
                 continue
             for i, val in enumerate(block.params):
-                if device.set_param(block_index=blk_idx, param_idx=i, value=float(val)):
+                if isinstance(val, bool):
+                    continue  # not writable through op 30
+                if device.set_param(block_index=blk_idx, param_idx=i, value=val):
                     ok_count += 1
                 else:
                     log.warning("set_param failed (continuing): slot=%d idx=%d", slot, i)
@@ -519,6 +533,11 @@ class MainWindow(QMainWindow):
             ed = self.editor_view.editor
             if ed is None:
                 return False
+            # Save stores the PEDAL's edit buffer, not ours: push the parameters
+            # the editor shows first, so a save can never persist stale values
+            # (e.g. a knob whose write was coalesced or lost).
+            if self.editor_view.modified:
+                self._flush_editor_params(device, ed)
             log.info("Saving preset “%s” to setlist=%d slot=%d…", name, setlist, slot)
             return device.save_preset(setlist, slot, name)
 
@@ -682,7 +701,11 @@ class MainWindow(QMainWindow):
     # --- helpers ---
 
     def _status(self, tail: str) -> None:
-        midi_txt = f"MIDI {self.midi.port}" if self.midi else "MIDI not available"
+        if self.midi is None:
+            midi_txt = "MIDI not available"
+        else:
+            # Backend name makes it obvious which OS stack is live (ALSA/CoreMIDI).
+            midi_txt = f"MIDI {self.midi.port} ({self.midi.backend.name})"
         self.statusBar().showMessage(f"{self._info}  ·  {tail}  ·  {midi_txt}")
 
     def _run(self, fn, on_done) -> None:
@@ -717,6 +740,8 @@ class MainWindow(QMainWindow):
             if w.isRunning():
                 w.wait(3000)
         self.device.disconnect()
+        if self.midi is not None:
+            self.midi.close()  # releases the CoreMIDI client / amidi handle
         super().closeEvent(event)
 
 
@@ -727,6 +752,10 @@ def run() -> int:
         level=getattr(logging, level, logging.INFO),
         format="%(relativeCreated)7.0fms %(levelname)s %(name)s: %(message)s",
     )
+    # Set before the QApplication exists so the OS uses it (window titles, the
+    # macOS menu bar, QMessageBox parents).
+    QApplication.setApplicationName("openpodgo")
+    QApplication.setApplicationDisplayName("openpodgo")
     app = QApplication.instance() or QApplication([])
     apply_dark_theme(app)
     win = MainWindow()

@@ -119,28 +119,31 @@ class PodGo:
         return self._info
 
     def list_setlists(self) -> list[str]:
-        """Names of the pedal setlists (e.g. ["Factory", "User"])."""
+        """Names of the pedal setlists (e.g. ["Factory", "User"]).
+
+        Reads do not invalidate the write channel: the write cursor lives in
+        its own stream, and a write right after a read (or after a preset
+        change) applies correctly without a new handshake — verified live,
+        ~20 ms instead of ~1 s of handshake per write. `_read_since_write` is
+        now only a RECOVERY flag, set when a write fails (see `set_param`).
+        """
         self._require_session()
-        self._read_since_write = True
         return preset.read_setlists(self._session)
 
     def list_presets(self, setlist: int = 0) -> list[PresetEntry]:
         """Read and return the 128 presets of the given setlist (0=Factory, 1=User)."""
         self._require_session()
-        self._read_since_write = True
         stream = preset.stream_presets(self._session, setlist=setlist)
         return preset.parse_preset_list(stream.raw)
 
     def active_state(self) -> preset.ActiveState:
         """Setlist/slot/name of the active preset (object 23)."""
         self._require_session()
-        self._read_since_write = True
         return preset.read_active_state(self._session)
 
     def active_preset(self) -> l6helix.Preset:
         """Full content of the active preset (object 22, l6-helix)."""
         self._require_session()
-        self._read_since_write = True
         return preset.read_active_preset(self._session)
 
     def active_preset_is_edited(self) -> bool:
@@ -170,7 +173,6 @@ class PodGo:
         Same pattern as specs 03/05: API ready, wiring marked pending.
         """
         session = self._require_session()
-        self._read_since_write = True
         if not _OBJ14_CRC_CONFIRMED:
             # Without the confirmed object 14 formula, any crc comparison
             # would yield confidently wrong false positives (Finding A).
@@ -269,14 +271,24 @@ class PodGo:
         resp = ws.send_write({102: _write_tx_id(), 100: 88, 101: {92: idx}})
         return _write_ok(resp)
 
-    def set_param(self, block_index: int, param_idx: int, value: float) -> bool:
-        """Set a continuous parameter.
+    def set_param(self, block_index: int, param_idx: int, value) -> bool:
+        """Set a parameter of the active preset's edit buffer.
 
         block_index is the on-wire index (k101.98) = RAW index in DSP_CHAIN
         (input=0); see editor.block_index. param_idx travels in key 28 (key 26
         is constant 0): verified against the pedal — putting param_idx in key 26
         makes the device ACK with status 255 and NOT apply anything except
         param 0 (where both keys are 0 and the error goes unnoticed).
+
+        `value` must keep the parameter's ON-WIRE type (the one the preset
+        decodes to): the pedal rejects a type mismatch with ``103: 255,
+        104: {111: -3}`` and does not apply anything. Verified live: an int
+        parameter (cab ``Mic``) only accepts ints (`8` applies, `8.0` is
+        rejected) and a float one (``Distance``) only accepts floats. Bool
+        parameters answer 255 to every encoding tried (``true``/``false``,
+        ``1``/``0``, ``1.0``/``0.0``), i.e. they are NOT writable through op 30:
+        callers skip them. See `editor.PresetEditor.set_param`, which preserves
+        the type in memory, so its value can be passed straight through.
 
         If it fails, reconnects the write session and retries once.
         """
@@ -288,12 +300,14 @@ class PodGo:
             )
             ok = _write_ok(resp)
             if ok:
-                log.info("set_param(blk=%d, idx=%d, val=%.4f) → True", block_index, param_idx, value)
+                log.info("set_param(blk=%d, idx=%d, val=%r) → True",
+                         block_index, param_idx, value)
                 return True
-            log.warning("set_param(blk=%d, idx=%d, val=%.4f) → attempt %d failed",
+            log.warning("set_param(blk=%d, idx=%d, val=%r) → attempt %d failed",
                         block_index, param_idx, value, attempt + 1)
             self._read_since_write = True  # force reconnect on retry
-        log.info("set_param(blk=%d, idx=%d, val=%.4f) → False (after retry)", block_index, param_idx, value)
+        log.info("set_param(blk=%d, idx=%d, val=%r) → False (after retry)",
+                 block_index, param_idx, value)
         return False
 
     def set_model(

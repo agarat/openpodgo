@@ -3,6 +3,10 @@
 Implements device opening, vendor-specific interface claim, and the bulk
 write/read helpers with the strict request->response pattern and the
 "stale data drain" described in https://github.com/allansomensi/openhx
+
+The USB stack itself is portable (pyusb + libusb-1.0 are the same on Linux and
+macOS); what differs is where libusb lives and whether a kernel driver has to
+be detached. Both questions are answered by :mod:`openpodgo.platform_support`.
 """
 
 from __future__ import annotations
@@ -11,9 +15,13 @@ import logging
 import threading
 import time
 from dataclasses import dataclass
+from functools import lru_cache
 
+import usb.backend.libusb1
 import usb.core
 import usb.util
+
+from . import platform_support
 
 log = logging.getLogger(__name__)
 
@@ -41,6 +49,32 @@ DRAIN_TIMEOUT_MS = 50
 
 class TransportError(Exception):
     """Failure in the USB transport layer."""
+
+
+@lru_cache(maxsize=1)
+def usb_backend():
+    """pyusb backend bound to a libusb that is actually installed here.
+
+    pyusb resolves libusb through `ctypes.util.find_library`, which on macOS
+    can return a library of the wrong architecture (an Intel copy under
+    `/usr/local` on an Apple Silicon Mac) and then fall back to "no backend".
+    :func:`platform_support.find_libusb` returns a path that loads, so the
+    transport can tell "libusb missing" apart from "pedal missing" and give an
+    actionable message instead of a NoBackendError.
+    """
+    path = platform_support.find_libusb()
+    if path is None:
+        raise TransportError(
+            "libusb-1.0 not found. Install it first: "
+            "'brew install libusb' on macOS, 'apt install libusb-1.0-0' on Linux."
+        )
+    backend = usb.backend.libusb1.get_backend(find_library=lambda _name: path)
+    if backend is None:
+        raise TransportError(
+            f"could not load the libusb backend from {path} "
+            f"({platform_support.usb_hint()})"
+        )
+    return backend
 
 
 @dataclass
@@ -89,7 +123,12 @@ class UsbTransport:
         self._dev = None
         self._info: DeviceInfo | None = None
         self._detached_kernel = False
-        self._lock = threading.Lock()
+        #: Serializes IN-endpoint reads: the three channels share one endpoint,
+        #: so a concurrent reader (event polling, NotificationReader) would
+        #: steal another channel's response. Reentrant because a channel
+        #: operation can hold the lock for its whole request→response sequence
+        #: and still call `request()` internally.
+        self._lock = threading.RLock()
 
     @property
     def info(self) -> DeviceInfo | None:
@@ -101,7 +140,8 @@ class UsbTransport:
         if dev is None:
             raise TransportError(
                 "No Line 6 device with a vendor interface found "
-                f"(VID {VENDOR_ID:#06x}). Is the POD Go connected and powered on?"
+                f"(VID {VENDOR_ID:#06x}). Is the POD Go connected and powered on? "
+                f"Also {platform_support.usb_hint()}."
             )
 
         found = _find_vendor_interface(dev)
@@ -113,14 +153,17 @@ class UsbTransport:
         interface, ep_out, ep_in = found
         pid = dev.idProduct
 
-        # Detach the kernel driver if it claimed the vendor interface.
-        try:
-            if dev.is_kernel_driver_active(interface):
-                log.info("Detaching kernel driver from interface %d", interface)
-                dev.detach_kernel_driver(interface)
-                self._detached_kernel = True
-        except (NotImplementedError, usb.core.USBError) as exc:
-            log.debug("detach_kernel_driver no aplicable: %s", exc)
+        # Detach the kernel driver if it claimed the vendor interface. Only
+        # Linux has one (pyusb raises NotImplementedError elsewhere), so ask
+        # before touching the device.
+        if platform_support.has_kernel_driver():
+            try:
+                if dev.is_kernel_driver_active(interface):
+                    log.info("Detaching kernel driver from interface %d", interface)
+                    dev.detach_kernel_driver(interface)
+                    self._detached_kernel = True
+            except usb.core.USBError as exc:
+                log.debug("detach_kernel_driver not applicable: %s", exc)
 
         try:
             dev.set_configuration(1)
@@ -128,7 +171,15 @@ class UsbTransport:
             # Already configured by the kernel: continue.
             log.debug("set_configuration(1): %s", exc)
 
-        usb.util.claim_interface(dev, interface)
+        try:
+            usb.util.claim_interface(dev, interface)
+        except usb.core.USBError as exc:
+            # macOS grants the device to a single process: POD Go Edit, a DAW
+            # or a leftover of this app shows up as "Access denied".
+            raise TransportError(
+                f"could not claim interface {interface} of the pedal ({exc}). "
+                f"Also {platform_support.usb_hint()}."
+            ) from exc
 
         # Clear endpoints that may be in a halt state.
         for ep in (ep_out, ep_in):
@@ -151,11 +202,13 @@ class UsbTransport:
 
     def _locate(self):
         # Prefer known PIDs; otherwise, any Line 6 with a vendor interface.
-        for dev in usb.core.find(find_all=True, idVendor=VENDOR_ID):
+        backend = usb_backend()
+        found = list(usb.core.find(find_all=True, idVendor=VENDOR_ID, backend=backend))
+        for dev in found:
             if _find_vendor_interface(dev) is not None:
                 if dev.idProduct in KNOWN_PRODUCT_IDS:
                     return dev
-        for dev in usb.core.find(find_all=True, idVendor=VENDOR_ID):
+        for dev in found:
             if _find_vendor_interface(dev) is not None:
                 return dev
         return None

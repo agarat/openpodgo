@@ -47,6 +47,8 @@ class EditorView(QWidget):
     #: emitted after reordering the chain in memory; MainWindow dumps the
     #: complete blob to the pedal (op 21) in the background.
     chain_write_requested = Signal()
+    #: the pedal refused a parameter value written from the Edit panel.
+    write_failed = Signal(str)
 
     def __init__(self) -> None:
         super().__init__()
@@ -100,6 +102,7 @@ class EditorView(QWidget):
         self.inspector.bypass_toggled.connect(self.toggle_bypass)
         self.inspector.model_chosen.connect(self.apply_model)
         self.inspector.clear_requested.connect(self.clear_slot)
+        self.inspector.write_failed.connect(self.write_failed)
         self.inspector.header.bypass_btn.toggled.connect(self._toggle_bypass_panel)
         root.addWidget(self.inspector, 1)
 
@@ -135,6 +138,9 @@ class EditorView(QWidget):
         """
         prev_selected = self._selected
         prev_modified = self.modified
+        # Writes queued against the previous preset must never reach the pedal
+        # once another preset is loaded (the block indices would point at it).
+        self.inspector.edit.cancel_pending_writes()
         self.editor = editor
         self.preset_name = name
         self.slot_text = slot_text

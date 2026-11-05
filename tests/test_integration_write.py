@@ -6,6 +6,7 @@ that all pieces (packets → session → device → editor) fit together.
 
 from __future__ import annotations
 
+import threading
 from pathlib import Path
 
 import msgpack
@@ -18,6 +19,9 @@ from openpodgo.session import Session, WriteSession
 from openpodgo.usb_transport import TransportError
 
 CAPS = Path(__file__).parent / "fixtures"
+
+#: Stands in for UsbTransport's reentrant lock in the mocks below.
+_FAKE_LOCK = threading.RLock()
 
 
 class MockTransport:
@@ -50,6 +54,11 @@ class MockTransport:
         resp = self.responses[self._ri]
         self._ri += 1
         return resp
+
+    #: Same reentrant lock contract as UsbTransport (see WriteSession).
+    @property
+    def lock(self):
+        return _FAKE_LOCK
 
     def open(self):
         return None
@@ -329,6 +338,26 @@ def test_set_param_encodes_param_idx():
     assert body[101][119] == pytest.approx(0.7, abs=1e-4)
 
 
+def test_set_param_preserves_the_wire_type():
+    """k119 keeps the parameter's MessagePack type.
+
+    Verified live: the pedal ACKs with `103: 255` and applies nothing when the
+    type does not match (int parameter written as `8.0`, float parameter
+    written as `1`), so the value must travel typed instead of float()-ed.
+    """
+    pod, t = _make_pod_with_mock()
+    t.responses = [b"\x00" * 16, _ok_resp(), b"\x00" * 16]
+    assert pod.set_param(block_index=7, param_idx=0, value=8) is True
+    sent = packets.decode_open_body(t.sent[0])[101][119]
+    assert isinstance(sent, int) and not isinstance(sent, bool) and sent == 8
+
+    pod, t = _make_pod_with_mock()
+    t.responses = [b"\x00" * 16, _ok_resp(), b"\x00" * 16]
+    assert pod.set_param(block_index=7, param_idx=2, value=1.5) is True
+    sent = packets.decode_open_body(t.sent[0])[101][119]
+    assert isinstance(sent, float) and sent == pytest.approx(1.5)
+
+
 def test_device_change_preset_uses_read_channel():
     """device.change_preset must use the read channel (src=0x1001), cmd=1, slot key=101."""
     pod, t = _make_pod_with_mock()
@@ -374,3 +403,80 @@ def test_flush_editor_params_resilient():
 
     result = MainWindow._flush_editor_params(pod, ed)
     assert result is True
+
+
+# --- write drain: stop at our own echo (per-write cost) ---
+
+
+class ScriptedTransport:
+    """Transport that returns scripted IN frames and counts reads."""
+
+    def __init__(self, frames: list[bytes]) -> None:
+        self.frames = list(frames)
+        self.reads = 0
+        self.written: list[bytes] = []
+
+    @property
+    def lock(self):
+        return _FAKE_LOCK
+
+    def write(self, pkt: bytes, timeout_ms: int = 2000) -> int:
+        self.written.append(pkt)
+        return len(pkt)
+
+    def read(self, timeout_ms: int = 2000) -> bytes:
+        self.reads += 1
+        if not self.frames:
+            raise TransportError("Operation timed out")
+        return self.frames.pop(0)
+
+
+def _echo(tx_id: int, status: int = 0) -> bytes:
+    """Framed write response (the frame that carries the status)."""
+    return packets.build_vendor_write(
+        {102: tx_id, 103: status, 104: {}}, seq=0x06
+    )
+
+
+def _ack() -> bytes:
+    """16 B ack: no status, no tx id (what the pedal sends ~100-250 ms later)."""
+    return b"\x00" * 16
+
+
+def test_send_write_returns_at_its_own_echo_without_waiting_for_acks():
+    """The trailing acks cost one 250 ms timeout each: stop at OUR echo.
+
+    Measured live: the echo arrives in ~2 ms and the acks 100-250 ms later, so
+    draining them made every parameter write take ~420 ms.
+    """
+    t = ScriptedTransport([_ack(), _echo(4242), _ack()])
+    ws = WriteSession(t)
+    ws._seq = 0x06
+
+    resp = ws.send_write({102: 4242, 100: 30, 101: {28: 0, 119: 0.5}})
+
+    assert packets.decode_open_body(resp)[102] == 4242
+    assert t.reads == 2  # stale ack + our echo; the trailing ack is not awaited
+
+
+def test_send_write_skips_a_stale_echo_from_a_previous_command():
+    """A leftover framed echo of another command must not be taken as status."""
+    t = ScriptedTransport([_echo(1111, status=255), _echo(4242, status=0)])
+    ws = WriteSession(t)
+    ws._seq = 0x06
+
+    resp = ws.send_write({102: 4242, 100: 30, 101: {28: 0, 119: 0.5}})
+
+    body = packets.decode_open_body(resp)
+    assert body[102] == 4242 and body[103] == 0
+    assert t.reads == 2
+
+
+def test_send_write_without_echo_drains_until_the_timeout():
+    """No echo (op that does not answer with one): fall back to a full drain."""
+    t = ScriptedTransport([_ack(), _ack()])
+    ws = WriteSession(t)
+    ws._seq = 0x06
+
+    assert ws.send_write({100: 30, 101: {}}) == b""
+    assert t.reads == 3  # the two acks + the read that times out

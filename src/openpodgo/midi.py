@@ -1,12 +1,20 @@
-"""Sending MIDI messages to the POD Go via ALSA (`amidi`).
+"""Sending MIDI messages to the POD Go.
 
-The POD Go exposes a class-compliant MIDI port (interface 4) that ALSA
-detects as "POD Go MIDI 1". Standard MIDI is sufficient for changing
-preset/snapshot and emulating footswitches, independently of the vendor
-session (interface 0).
+The pedal exposes a class-compliant MIDI device (it shows up as "POD Go"),
+which is enough to recall presets/snapshots and to emulate footswitches
+independently of the USB vendor session.
 
-`amidi -S` is used to avoid adding extra native dependencies. Official
-POD Go MIDI table (Owner's Manual):
+The messages are the same on every OS; only the transport differs, so it is
+pluggable behind :class:`MidiBackend`:
+
+- **Linux** → :class:`midi_alsa.AlsaBackend`, shells out to ``amidi``
+  (alsa-utils), no Python dependency.
+- **macOS** → :class:`midi_coremidi.CoreMidiBackend`, talks to CoreMIDI
+  through ``ctypes``, no dependency either.
+
+:class:`MidiOut` stays platform-agnostic: it builds the messages and asks the
+backend to find the port and write the bytes. Official POD Go MIDI table
+(Owner's Manual):
 - Program Change (channel 1): preset recall 0-127 of the active setlist.
 - CC 69: snapshot (0-3).
 - CC 49-56: footswitches FS1-FS8.
@@ -16,12 +24,12 @@ POD Go MIDI table (Owner's Manual):
 from __future__ import annotations
 
 import logging
-import re
-import shutil
-import subprocess
+
+from . import platform_support
 
 log = logging.getLogger(__name__)
 
+#: Substring of the pedal's MIDI port name on every OS ("POD Go MIDI 1").
 PORT_NAME_HINT = "POD Go"
 
 # Channel 1 (status nibble 0). Program Change = 0xC0.
@@ -37,43 +45,92 @@ CC_EXP2 = 2
 
 
 class MidiError(Exception):
-    """Failed to send MIDI to the POD Go."""
+    """Failed to talk MIDI to the POD Go."""
+
+
+def port_matches(name: str, hint: str = PORT_NAME_HINT) -> bool:
+    """True if `name` looks like the pedal's port.
+
+    Case-insensitive substring: OSes decorate the name differently ("POD Go
+    MIDI 1" on ALSA, "POD Go" on CoreMIDI) and the user may rename the port.
+    """
+    return hint.lower() in name.lower()
+
+
+class MidiBackend:
+    """OS-specific MIDI transport: find the pedal's port and write messages.
+
+    Subclasses only implement the two OS calls; `name` is shown in the status
+    bar so it is obvious which stack is live (e.g. "ALSA", "CoreMIDI").
+    """
+
+    #: Short label of the OS stack, for logs and the status bar.
+    name = "MIDI"
+
+    def find_port(self, hint: str = PORT_NAME_HINT) -> str | None:
+        """Identifier of the first matching port, or None if there is none."""
+        raise NotImplementedError
+
+    def send(self, port: str, message: bytes) -> None:
+        """Write one complete MIDI message to `port`."""
+        raise NotImplementedError
+
+    def close(self) -> None:
+        """Release any OS resource held (no-op by default)."""
+
+
+def default_backend() -> MidiBackend:
+    """The MIDI backend for this OS.
+
+    The backends are imported here (not at module level) so that a session
+    only ever loads the OS stack it can actually use.
+    """
+    if platform_support.is_macos():
+        from .midi_coremidi import CoreMidiBackend
+
+        return CoreMidiBackend()
+    if platform_support.is_linux():
+        from .midi_alsa import AlsaBackend
+
+        return AlsaBackend()
+    raise MidiError(
+        f"MIDI is not implemented for {platform_support.os_name()!r} "
+        f"({platform_support.midi_install_hint()})"
+    )
 
 
 def find_port(hint: str = PORT_NAME_HINT) -> str | None:
-    """Return the ALSA port (e.g. 'hw:2,0,0') of the POD Go, or None."""
-    if shutil.which("amidi") is None:
-        raise MidiError("'amidi' not found (install alsa-utils)")
-    out = subprocess.run(
-        ["amidi", "-l"], capture_output=True, text=True, check=False
-    ).stdout
-    for line in out.splitlines():
-        if hint.lower() in line.lower():
-            m = re.search(r"(hw:\S+)", line)
-            if m:
-                return m.group(1)
-    return None
+    """Identifier of the POD Go MIDI port on this OS, or None if absent."""
+    backend = default_backend()
+    try:
+        return backend.find_port(hint)
+    finally:
+        backend.close()
 
 
 class MidiOut:
-    """MIDI output to the POD Go via an ALSA port."""
+    """MIDI output to the POD Go through the platform backend."""
 
-    def __init__(self, port: str | None = None) -> None:
-        self.port = port or find_port()
+    def __init__(
+        self, port: str | None = None, backend: MidiBackend | None = None
+    ) -> None:
+        self.backend = backend if backend is not None else default_backend()
+        self.port = port or self.backend.find_port()
         if self.port is None:
             raise MidiError(
-                "POD Go MIDI port not found. Is it connected?"
+                f"POD Go MIDI port not found ({self.backend.name}). "
+                f"Is the pedal connected? {platform_support.midi_install_hint()}"
             )
 
     def _send(self, *data: int) -> None:
-        hexstr = " ".join(f"{b & 0xFF:02X}" for b in data)
-        res = subprocess.run(
-            ["amidi", "-p", self.port, "-S", hexstr],
-            capture_output=True, text=True, check=False,
+        message = bytes(b & 0xFF for b in data)
+        self.backend.send(self.port, message)
+        log.debug(
+            "MIDI -> %s [%s]: %s",
+            self.port,
+            self.backend.name,
+            message.hex(" ").upper(),
         )
-        if res.returncode != 0:
-            raise MidiError(f"amidi failed sending {hexstr!r}: {res.stderr.strip()}")
-        log.debug("MIDI -> %s: %s", self.port, hexstr)
 
     def program_change(self, preset: int) -> None:
         """Recall preset 0-127 of the active setlist."""
@@ -113,3 +170,7 @@ class MidiOut:
 
     def tap_tempo(self) -> None:
         self.control_change(CC_TAP_TEMPO, 127)
+
+    def close(self) -> None:
+        """Release the OS resources held by the backend."""
+        self.backend.close()

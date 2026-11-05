@@ -1,11 +1,11 @@
 # openpodgo
 
-**An open-source editor for the [Line 6 POD Go](https://line6.com/podgo/) on Linux** — a community clone of *POD Go Edit*.
+**An open-source editor for the [Line 6 POD Go](https://line6.com/podgo/) on Linux and macOS** — a community clone of *POD Go Edit*.
 
 openpodgo talks to the pedal over the Helix/HX family's USB **vendor protocol**
 (bulk transfers + presets in MessagePack), reverse-engineered by the community
 and adapted to the POD Go (`0e41:4247`). It runs where the official editor does
-not: Linux.
+not: Linux, and natively on macOS.
 
 ## Screenshots
 
@@ -31,8 +31,9 @@ not: Linux.
   inspector, model swapping, parameter editing, bypass/controller assignment,
   snapshots, and bidirectional live-sync (changes on the pedal update the UI).
 - **`.pgp` import/export** compatible with the POD Go Edit / CustomTone format.
-- **MIDI** helpers over ALSA (`amidi`): program change, setlist select,
-  snapshots, footswitches, tap.
+- **MIDI** helpers with one small platform abstraction: program change, setlist
+  select, snapshots, footswitches, tap — over ALSA (`amidi`) on Linux and over
+  CoreMIDI (no extra dependency) on macOS.
 
 ## What it does **not** do (yet) / limits
 
@@ -42,15 +43,16 @@ not: Linux.
 - **No proprietary assets are bundled.** Out of the box the UI uses neutral
   placeholder icons. To get the real artwork you copy it in yourself — see
   [Icons & artwork](#icons--artwork).
-- **Linux-focused.** It may work on other platforms with `libusb`, but only
-  Linux is tested.
+- **Linux and macOS only.** Both are tested (Linux/ALSA and macOS/CoreMIDI);
+  Windows would need a MIDI backend (WinMM) and is untested.
 - Some features are work-in-progress; see [`docs/specs/00-roadmap.md`](docs/specs/00-roadmap.md).
 - **Back up your presets.** Writing to hardware always carries risk.
 
 ## Requirements
 
-- Linux, Python **3.10+**
+- Linux **or** macOS, Python **3.10+**
 - A POD Go connected over USB
+- **libusb-1.0** (Linux: `libusb-1.0-0`; macOS: `brew install libusb`)
 - For the UI: a Qt-capable desktop (PySide6 is installed via the `ui` extra)
 
 ## Download
@@ -69,7 +71,8 @@ python3 -m venv .venv && . .venv/bin/activate
 pip install "openpodgo-<ver>.tar.gz[ui]"     # includes the UI
 ```
 
-For USB access without sudo, see "USB access without sudo" below.
+For USB access without sudo on Linux, see "Platform setup" below (macOS needs
+no extra step beyond libusb).
 
 ## Install
 
@@ -80,13 +83,33 @@ python3 -m venv .venv && . .venv/bin/activate
 pip install -e '.[dev,ui]'     # library + tests + UI
 ```
 
-### USB access without sudo
+### Platform setup
+
+openpodgo picks the right components for the OS it runs on
+(`src/openpodgo/platform_support.py`); only the USB/MIDI plumbing differs.
+
+**Linux** — allow USB access without sudo:
 
 ```bash
 sudo cp 99-podgo.rules /etc/udev/rules.d/99-podgo.rules
 sudo udevadm control --reload-rules && sudo udevadm trigger
 # then reconnect the POD Go
 ```
+
+MIDI uses ALSA through `amidi`, so `alsa-utils` must be installed
+(`sudo apt install alsa-utils`).
+
+**macOS** — install libusb, which pyusb needs and which is not bundled:
+
+```bash
+brew install libusb
+```
+
+No udev rules or MIDI setup: the pedal appears automatically as a CoreMIDI
+device and is driven through CoreMIDI directly. macOS grants a USB device to a
+single process, so close POD Go Edit (or any DAW using the pedal) before
+connecting. If you have an Apple Silicon Mac, an old Homebrew path is handled
+automatically — openpodgo picks the libusb build that actually loads.
 
 ## Run
 
@@ -131,7 +154,7 @@ python -m pytest                       # offline test suite (no pedal needed)
 
 The suite runs entirely offline against small, sanitized fixtures under
 `tests/fixtures/`. In a fresh clone (no proprietary resources present) it runs
-**315 tests**; a further 28 are skipped because they need the official POD Go
+**355 tests**; a further 28 are skipped because they need the official POD Go
 Edit resources or your own USB captures locally.
 
 RE / hardware tools live in `tools/` (they talk to a real pedal — close the app
@@ -145,7 +168,9 @@ python tools/capture.py --label "..."  # labeled capture for RE
 ## Project structure
 
 - `src/openpodgo/` — the library: `usb_transport`, `session`, `packets`,
-  `preset`, `l6helix`, `catalog`, `device`, `editor`, `midi`, and `ui/`.
+  `preset`, `l6helix`, `catalog`, `device`, `editor`, `midi` (with the
+  per-OS backends `midi_alsa` / `midi_coremidi` behind `platform_support`),
+  and `ui/`.
 - `tools/` — reverse-engineering / validation scripts (run against a real pedal).
 - `docs/` — `protocol.md` and the numbered RE `specs/`.
 - `tests/` — offline test suite and sanitized fixtures.

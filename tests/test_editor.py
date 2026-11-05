@@ -52,6 +52,40 @@ def test_set_param_preserva_tipo_bool():
     assert ed.preset.chain[slot].params[1] is True
 
 
+def _int_param_slot(ed) -> tuple[int, int]:
+    """First (slot, idx) of an int-typed parameter in the fixture."""
+    for slot, blk in enumerate(ed.preset.chain):
+        if blk is None:
+            continue
+        for idx, value in enumerate(blk.params):
+            if isinstance(value, int) and not isinstance(value, bool):
+                return slot, idx
+    raise AssertionError("the fixture has no int parameter")
+
+
+def test_set_param_conserva_tipo_int():
+    """An int parameter stays an int even when a slider sends a float.
+
+    The on-wire type is what the pedal validates (it rejects an int parameter
+    written as float, ACK `103: 255`), so the editor must not widen it.
+    """
+    ed = _editor()
+    slot, idx = _int_param_slot(ed)
+    ed.set_param(slot, idx, 4.6)
+    value = ed.preset.chain[slot].params[idx]
+    assert value == 5
+    assert isinstance(value, int) and not isinstance(value, bool)
+
+
+def test_set_io_param_conserva_tipo():
+    """Same rule for the Input/Output block: values keep their type."""
+    ed = _editor()
+    before = ed.io_values("input")
+    ed.set_io_param("input", 0, before[0])
+    values = ed.io_values("input")
+    assert [type(v) for v in values] == [type(b) for b in before]
+
+
 def test_set_bypass():
     ed = _editor()
     slot = _slot_of(ed.preset, 366)

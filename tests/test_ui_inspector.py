@@ -343,3 +343,98 @@ def test_available_models_is_the_old_picker_universe(app):
     names = [n for n, _short, _cat in available_models()]
     assert len(names) == len(set(names))
     assert "HD2_DM4TubeDrive" in names
+
+
+# --- writes to the pedal (op 30) ---
+
+
+class FakeDevice:
+    """Records set_param calls; `accept=False` makes the pedal refuse them."""
+
+    def __init__(self, accept: bool = True) -> None:
+        self.writes: list[tuple[int, int, object]] = []
+        self.accept = accept
+
+    def set_param(self, block_index: int, param_idx: int, value) -> bool:
+        self.writes.append((block_index, param_idx, value))
+        return self.accept
+
+
+def test_edit_panel_writes_are_coalesced_and_typed(app):
+    """A drag queues one write with the newest value, typed as the pedal wants."""
+    ed = _editor()
+    slot = _slot_of(ed, 366)  # Tube Drive: 5 float params
+    device = FakeDevice()
+    panel = InspectorPanel()
+    panel.show_block(ed, slot, lambda: None, device)
+    edit = panel.edit
+
+    for pos in (100, 200, 300):
+        edit.rows[0].widget.setValue(pos)
+
+    assert device.writes == []  # still inside the coalescing window
+    edit.flush_writes()
+    assert len(device.writes) == 1
+    block_index, param_idx, value = device.writes[0]
+    assert (block_index, param_idx) == (ed.block_index(slot), 0)
+    assert isinstance(value, float)
+    assert value == pytest.approx(0.3, abs=1e-6)
+
+
+def test_edit_panel_sends_int_params_as_int(app):
+    """Int parameters travel as ints (a float would be rejected by the pedal)."""
+    ed = _editor()
+    slot = _slot_of(ed, _int_model_id(ed))  # first block with an int param
+    device = FakeDevice()
+    panel = InspectorPanel()
+    panel.show_block(ed, slot, lambda: None, device)
+    edit = panel.edit
+    idx = next(i for i, v in enumerate(ed.preset.chain[slot].params)
+               if isinstance(v, int) and not isinstance(v, bool))
+    row = edit.rows[idx]
+    if row.combo is not None:  # labeled discrete: pick the last option
+        row.combo.setCurrentIndex(row.combo.count() - 1)
+    else:  # int slider: drag to the maximum
+        row.widget.setValue(row.widget.maximum())
+    edit.flush_writes()
+    assert len(device.writes) == 1
+    _blk, _idx, value = device.writes[0]
+    assert isinstance(value, int) and not isinstance(value, bool)
+
+
+def test_edit_panel_skips_bool_params(app):
+    """Bools are not writable via op 30: they stay in memory, no error spam."""
+    ed = _editor()
+    slot = _slot_of(ed, 224)  # VolPan: [Pedal, VolumeTaper(bool)]
+    device = FakeDevice()
+    panel = InspectorPanel()
+    panel.show_block(ed, slot, lambda: None, device)
+    panel.edit.rows[1].combo.setCurrentIndex(1)
+    panel.edit.flush_writes()
+    assert device.writes == []
+    assert ed.preset.chain[slot].params[1] is True
+
+
+def test_edit_panel_reports_rejected_values(app):
+    """A refusal from the pedal reaches the status bar through the signal."""
+    ed = _editor()
+    slot = _slot_of(ed, 366)
+    panel = InspectorPanel()
+    panel.show_block(ed, slot, lambda: None, FakeDevice(accept=False))
+    messages: list[str] = []
+    panel.write_failed.connect(messages.append)
+
+    panel.edit.rows[0].widget.setValue(500)
+    panel.edit.flush_writes()
+
+    assert messages and "rejected" in messages[0]
+
+
+def _int_model_id(ed) -> int:
+    """model_id of the first block that has an int parameter (fixture helper)."""
+    for blk in ed.preset.chain:
+        if blk is None:
+            continue
+        if any(isinstance(v, int) and not isinstance(v, bool) for v in blk.params):
+            return blk.model_id
+    raise AssertionError("the fixture has no int parameter")
