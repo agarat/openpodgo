@@ -46,6 +46,10 @@ class Session:
         self.transport = transport
         self._seq = packets.FIRST_APP_SEQ
         self._open = False
+        #: Has a handshake already run on this connection? Only the FIRST one on
+        #: a fresh connection is answered at once; every later one needs the
+        #: priming magic (see `_prime`).
+        self._handshaken = False
 
     @property
     def seq(self) -> int:
@@ -62,13 +66,39 @@ class Session:
     #: retry instead of waiting 2 s per packet.
     HANDSHAKE_TIMEOUT_MS = 300
 
+    #: How long to wait for the answer to the priming magic. The pedal does not
+    #: answer it (it is a reset), so this only bounds the call.
+    PRIME_READ_MS = 20
+
+    def _prime(self) -> None:
+        """Send the reset magic that the pedal ignores.
+
+        Measured live (fw 2.01): on a FRESH connection the device answers the
+        handshake magic immediately, but after any completed handshake it
+        silently drops the next magic — the retry (300 ms later) is answered in
+        1 ms. That cost one failed attempt plus the exponential backoff on
+        EVERY operation: ~660 ms of dead time per read (a preset load does
+        several), and it showed up as "the app syncs slowly".
+
+        Sending the magic once more, without waiting for it, gets the device
+        back to the state where the real sequence is answered: handshake ~400 ms
+        instead of ~1000 ms. Caller holds the transport lock.
+        """
+        self.transport.write(packets.HANDSHAKE_SEQUENCE[0])
+        time.sleep(0.01)
+        try:
+            self.transport.read(self.PRIME_READ_MS)  # swallow a stray answer
+        except TransportError:
+            pass
+
     def handshake(self) -> None:
         """Execute the 5-packet init with drain + exponential backoff.
 
         The device requires this handshake before each major operation
-        (list_setlists, stream_presets, read_object). The first attempt
-        usually fails because the device is still processing the previous
-        response; drain + 300 ms backoff + second attempt always works.
+        (list_setlists, stream_presets, read_object); the session cannot be
+        reused for a second read. After the first handshake of a connection the
+        magic is primed (`_prime`) so the sequence is answered on the first
+        attempt instead of after a 300 ms backoff.
         """
         last_exc: Exception | None = None
         for attempt in range(MAX_INIT_ATTEMPTS):
@@ -77,12 +107,15 @@ class Session:
                 # channel's response arriving meanwhile must not be consumed.
                 with self.transport.lock:
                     self.transport.drain()
+                    if self._handshaken:
+                        self._prime()
                     for pkt in packets.HANDSHAKE_SEQUENCE:
                         self.transport.request(
                             pkt, timeout_ms=self.HANDSHAKE_TIMEOUT_MS
                         )
                 self._seq = packets.FIRST_APP_SEQ
                 self._open = True
+                self._handshaken = True
                 log.info("Handshake completed (attempt %d)", attempt + 1)
                 return
             except TransportError as exc:
@@ -144,6 +177,17 @@ class WriteSession:
     @property
     def cursor(self) -> int:
         return self._cursor
+
+    def rewind_to(self, cursor: int) -> None:
+        """Put the stream cursor back before a command the pedal did NOT apply.
+
+        The pedal validates the cursor: a command it refuses does not advance
+        its own position, while `send_write` always advances ours. Resending at
+        the rewound cursor is idempotent (same command, same position), so a
+        refused command is retried there instead of leaving every later write
+        mispositioned — the "the pedal did not select block N" burst (spec 14).
+        """
+        self._cursor = cursor
 
     def advance_seq(self) -> int:
         current = self._seq

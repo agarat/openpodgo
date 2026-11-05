@@ -90,6 +90,9 @@ class MainWindow(QMainWindow):
         #: flushed when the worker finishes instead of being dropped (issue #2,
         #: e.g. two quick bypass toggles).
         self._chain_write_pending = False
+        #: Block the user selected while a USB read was in flight: the pedal is
+        #: told when that read finishes (a write during a stream is refused).
+        self._pending_block_select: int | None = None
 
         self._build_ui()
         self._build_menu()
@@ -116,6 +119,7 @@ class MainWindow(QMainWindow):
         self.editor_view.snapshot_selected.connect(self._on_snapshot)
         self.editor_view.chain_write_requested.connect(self._write_chain_to_pedal)
         self.editor_view.write_failed.connect(self._on_write_failed)
+        self.editor_view.block_selected.connect(self._on_block_selected)
         self.editor_view.prev_requested.connect(lambda: self._step_preset(-1))
         self.editor_view.next_requested.connect(lambda: self._step_preset(+1))
 
@@ -166,8 +170,11 @@ class MainWindow(QMainWindow):
         def job():
             info = self.device.connect()
             self.device.write_connect()
-            setlists = self.device.list_setlists() or ["Factory", "User"]
+            # Setlists + presets of the current setlist in ONE handshake (each
+            # operation costs a full session, see spec 13).
             state = self.device.active_state()
+            setlists, presets = self.device.list_presets_and_setlists(state.setlist)
+            setlists = setlists or ["Factory", "User"]
             current = (
                 state.setlist
                 if state.setlist < len(setlists)
@@ -176,7 +183,6 @@ class MainWindow(QMainWindow):
                     0,
                 )
             )
-            presets = self.device.list_presets(current)
             pre = self.device.active_preset()
             # Does the pedal report the active preset as edited? Computed in the
             # worker thread (USB does not run on the UI thread). Today it always
@@ -235,6 +241,50 @@ class MainWindow(QMainWindow):
         """A parameter written from the editor was not accepted by the pedal."""
         log.warning("Write to the pedal failed: %s", msg)
         self.statusBar().showMessage(f"Not written to the pedal — {msg}")
+
+    def _on_block_selected(self, selection) -> None:
+        """Tell the pedal which block the user is editing (op 78).
+
+        The pedal has its own edit focus: its screen and physical knobs act on
+        the block it has selected. `device.select_block` sends the same packet
+        POD Go Edit sends when a block is clicked in its chain (RE from a USBPcap
+        capture, see `docs/specs/12-block-focus.md`), so a knob turn follows the
+        app instead of staying on the previous block.
+        """
+        ed = self.editor_view.editor
+        if ed is None or self.device is None or not self.device.connected:
+            return
+        try:
+            block_index = (
+                ed.io_block_index(selection)
+                if isinstance(selection, str)
+                else ed.block_index(selection)
+            )
+        except (ValueError, IndexError) as exc:
+            log.debug("cannot select %r on the pedal: %s", selection, exc)
+            return
+        if self._workers:
+            # A read operation holds the USB endpoint for its whole stream (it
+            # is one critical section, spec 14): sending the selection now would
+            # block the UI thread for up to a second, so it waits for the worker.
+            self._pending_block_select = block_index
+            return
+        self._select_block_on_pedal(block_index)
+
+    def _select_block_on_pedal(self, block_index: int) -> None:
+        try:
+            if not self.device.select_block(block_index):
+                log.warning("the pedal did not select block %d", block_index)
+            else:
+                log.debug("pedal selected block %d", block_index)
+        except Exception as exc:  # noqa: BLE001 — focus sync is best effort
+            log.warning("select_block(%d) failed: %s", block_index, exc)
+
+    def _flush_pending_block_select(self) -> None:
+        """Send a selection that was postponed by an in-flight read (newest wins)."""
+        block_index, self._pending_block_select = self._pending_block_select, None
+        if block_index is not None and self.device is not None and self.device.connected:
+            self._select_block_on_pedal(block_index)
 
     # --- setlists/presets ---
 
@@ -729,6 +779,7 @@ class MainWindow(QMainWindow):
             if self._notification_reader is not None:
                 self._notification_reader.resume()
             self._flush_pending_chain_write()
+            self._flush_pending_block_select()
 
         worker.finished.connect(_cleanup)
         self._workers.add(worker)

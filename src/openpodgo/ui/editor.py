@@ -49,6 +49,9 @@ class EditorView(QWidget):
     chain_write_requested = Signal()
     #: the pedal refused a parameter value written from the Edit panel.
     write_failed = Signal(str)
+    #: slot (int) or "input"/"output" selected by the user in the chain: the
+    #: pedal's own edit view follows it (op 33), so its knobs act on that block.
+    block_selected = Signal(object)
 
     def __init__(self) -> None:
         super().__init__()
@@ -256,11 +259,13 @@ class EditorView(QWidget):
     def select_slot(self, slot: int) -> None:
         self._selected = slot
         self._refresh()
+        self.block_selected.emit(slot)
 
     def select_io(self, io: str) -> None:
         """Selects the Input/Output block to edit its params (#2)."""
         self._selected = io
         self._refresh()
+        self.block_selected.emit(io)
 
     def toggle_bypass(self, slot: int) -> None:
         block = self.editor.preset.chain[slot]

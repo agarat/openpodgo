@@ -118,6 +118,19 @@ class PodGo:
         log.info("Connected to %s", self._info)
         return self._info
 
+    def _exclusive(self, fn):
+        """Run a whole USB operation inside the transport lock.
+
+        A read is SEVERAL requests (handshake + OPEN_PRESETS + stream chunks),
+        not one: without the lock around the whole sequence, a write issued from
+        the UI slips in between two chunks — in the middle of the pedal's
+        stream — and is refused (e.g. "the pedal did not select block N" errors).
+        The lock is reentrant, so the nested `request()`/`handshake()` calls
+        inside take it again on the same thread.
+        """
+        with self._transport.lock:
+            return fn()
+
     def list_setlists(self) -> list[str]:
         """Names of the pedal setlists (e.g. ["Factory", "User"]).
 
@@ -128,23 +141,40 @@ class PodGo:
         now only a RECOVERY flag, set when a write fails (see `set_param`).
         """
         self._require_session()
-        return preset.read_setlists(self._session)
+        return self._exclusive(lambda: preset.read_setlists(self._session))
 
     def list_presets(self, setlist: int = 0) -> list[PresetEntry]:
         """Read and return the 128 presets of the given setlist (0=Factory, 1=User)."""
         self._require_session()
-        stream = preset.stream_presets(self._session, setlist=setlist)
+        stream = self._exclusive(
+            lambda: preset.stream_presets(self._session, setlist=setlist)
+        )
         return preset.parse_preset_list(stream.raw)
+
+    def list_presets_and_setlists(
+        self, setlist: int = 0
+    ) -> tuple[list[str], list[PresetEntry]]:
+        """Setlist names AND the presets of `setlist` for ONE handshake.
+
+        Each USB operation pays a full handshake (~600 ms, see spec 13), and the
+        OPEN_PRESETS response that opens the preset stream already carries the
+        setlist table: reading both together saves one operation on connect.
+        """
+        self._require_session()
+        stream = self._exclusive(
+            lambda: preset.stream_presets(self._session, setlist=setlist)
+        )
+        return stream.setlists, preset.parse_preset_list(stream.raw)
 
     def active_state(self) -> preset.ActiveState:
         """Setlist/slot/name of the active preset (object 23)."""
         self._require_session()
-        return preset.read_active_state(self._session)
+        return self._exclusive(lambda: preset.read_active_state(self._session))
 
     def active_preset(self) -> l6helix.Preset:
         """Full content of the active preset (object 22, l6-helix)."""
         self._require_session()
-        return preset.read_active_preset(self._session)
+        return self._exclusive(lambda: preset.read_active_preset(self._session))
 
     def active_preset_is_edited(self) -> bool:
         """Is the active preset edited-unsaved (the pedal's "●")?
@@ -267,9 +297,43 @@ class PodGo:
 
     def set_snapshot(self, idx: int) -> bool:
         """Switch to snapshot idx (0-3)."""
+        return self._write_command(
+            lambda: {102: _write_tx_id(), 100: 88, 101: {92: idx}},
+            f"set_snapshot({idx})",
+        )
+
+    def _write_command(self, build, label: str) -> bool:
+        """Send one write command, keeping the stream cursor in sync if refused.
+
+        The pedal validates the stream cursor and does NOT advance its own
+        position for a command it refuses, while `send_write` always advances
+        ours. One refused command therefore leaves EVERY later write
+        mispositioned (symptom: "the pedal did not select block N" repeats in a
+        burst, spec 14). So on a refusal the command is resent once at the
+        rewound cursor (idempotent: same command, same position), and only if
+        that also fails is the write channel re-handshaked before a last try.
+
+        `build()` returns the payload (a fresh tx id each call).
+        """
         ws = self._require_write_session()
-        resp = ws.send_write({102: _write_tx_id(), 100: 88, 101: {92: idx}})
-        return _write_ok(resp)
+        for attempt in range(3):
+            cursor = ws.cursor
+            resp = ws.send_write(build())
+            if _write_ok(resp):
+                if attempt:
+                    log.info("%s → True (attempt %d)", label, attempt + 1)
+                return True
+            detail = ""
+            body = packets.decode_open_body(resp) if resp else None
+            if isinstance(body, dict):
+                detail = f" (103={body.get(103)}, 104={body.get(104)})"
+            log.warning("%s → refused by the pedal%s (attempt %d)",
+                        label, detail, attempt + 1)
+            ws.rewind_to(cursor)  # the pedal did not advance: resend here
+            if attempt == 1:      # twice refused: assume a desynced stream
+                self.write_connect()
+                ws = self._write_session  # type: ignore[assignment]
+        return False
 
     def set_param(self, block_index: int, param_idx: int, value) -> bool:
         """Set a parameter of the active preset's edit buffer.
@@ -290,25 +354,17 @@ class PodGo:
         callers skip them. See `editor.PresetEditor.set_param`, which preserves
         the type in memory, so its value can be passed straight through.
 
-        If it fails, reconnects the write session and retries once.
+        A refusal is retried with the cursor rewound (see `_write_command`).
         """
-        for attempt in range(2):
-            ws = self._require_write_session()
-            resp = ws.send_write(
-                {102: _write_tx_id(), 100: 30,
-                 101: {98: block_index, 29: True, 26: 0, 28: param_idx, 119: value}}
-            )
-            ok = _write_ok(resp)
-            if ok:
-                log.info("set_param(blk=%d, idx=%d, val=%r) → True",
-                         block_index, param_idx, value)
-                return True
-            log.warning("set_param(blk=%d, idx=%d, val=%r) → attempt %d failed",
-                        block_index, param_idx, value, attempt + 1)
-            self._read_since_write = True  # force reconnect on retry
-        log.info("set_param(blk=%d, idx=%d, val=%r) → False (after retry)",
-                 block_index, param_idx, value)
-        return False
+        ok = self._write_command(
+            lambda: {102: _write_tx_id(), 100: 30,
+                     101: {98: block_index, 29: True, 26: 0, 28: param_idx,
+                           119: value}},
+            f"set_param(blk={block_index}, idx={param_idx}, val={value!r})",
+        )
+        log.info("set_param(blk=%d, idx=%d, val=%r) → %s",
+                 block_index, param_idx, value, ok)
+        return ok
 
     def set_model(
         self, block_index: int, wire_id: int, no_snapshot_bypass: bool = False
@@ -376,34 +432,45 @@ class PodGo:
     def save_preset(self, setlist: int, slot: int, name: str) -> bool:
         """Save the edit buffer to the indicated slot.
 
-        Retries once with forced reconnect on failure (the write channel
-        cursor can desync after previous writes).
+        A refusal is retried with the cursor rewound (see `_write_command`).
         """
-        for attempt in range(2):
-            ws = self._require_write_session()
-            resp = ws.send_write(
-                {102: _write_tx_id(), 100: 71,
-                 101: {107: setlist, 108: slot, 109: name + "\x00"}}
-            )
-            ok = _write_ok(resp)
-            if ok:
-                log.info("save_preset(setlist=%d, slot=%d, name=%r) → True", setlist, slot, name)
-                return True
-            log.warning("save_preset(setlist=%d, slot=%d, name=%r) → attempt %d failed",
-                        setlist, slot, name, attempt + 1)
-            self._read_since_write = True  # force reconnect on retry
-        log.warning("save_preset(setlist=%d, slot=%d, name=%r) → False (after retry)", setlist, slot, name)
-        return False
+        ok = self._write_command(
+            lambda: {102: _write_tx_id(), 100: 71,
+                     101: {107: setlist, 108: slot, 109: name + "\x00"}},
+            f"save_preset(setlist={setlist}, slot={slot}, name={name!r})",
+        )
+        log.info("save_preset(setlist=%d, slot=%d, name=%r) → %s",
+                 setlist, slot, name, ok)
+        return ok
+
+    def select_block(self, block_index: int) -> bool:
+        """Select a block in the pedal's own edit view (op 78).
+
+        RE from a USBPcap capture of POD Go Edit (spec 12): clicking a block in
+        its chain sends ``{102: tx_id, 100: 78, 101: {98: block}}`` on the write
+        channel — the same raw block index `set_param` uses (input = 0) — and
+        the pedal answers ``{103: 0, 104: nil}``, then emits an op 39 event
+        ``{98: block}``. The pedal's screen and physical knobs follow it, so
+        without this the UI can show block B while a knob still turns block A.
+        """
+        return self._write_command(
+            lambda: {102: _write_tx_id(), 100: 78, 101: {98: block_index}},
+            f"select_block({block_index})",
+        )
 
     def _apply_edit(self, ws: WriteSession, block_index: int | None = None) -> None:
         """Post-edit "apply/refresh" that POD Go Edit sends after an edit.
 
         RE from change-pedal-from-app.pcapng: after set_model (op 40), the
-        official app sends op 33 ``{101: {102: block}}`` (refresh the edited
-        block), op 23 ``{101: None}`` and op 22 ``{101: None}`` (commit +
-        refresh of the buffer). Without this the pedal applies the data but
-        does NOT refresh the footswitch/LED until the switch is toggled.
-        Best-effort: if these fail, the write is not aborted.
+        official app sends op 33 ``{101: {102: block}}``, op 23 ``{101: None}``
+        and op 22 ``{101: None}`` (commit + refresh of the buffer). Without this
+        the pedal applies the data but does NOT refresh the footswitch/LED until
+        the switch is toggled. Best-effort: if these fail, the write is not
+        aborted.
+
+        Note (live RE, spec 12): op 33 is a READ of the block descriptor (it
+        answers ``{102: slot, 65: …, 67: [assignments]}``) and does NOT move the
+        pedal's edit focus.
         """
         if block_index is not None:
             try:

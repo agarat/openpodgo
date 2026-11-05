@@ -280,15 +280,23 @@ def test_write_handshake_calls_drain_before_sending():
 
 def test_session_handshake_resends_packets_when_session_open():
     """handshake() always sends the 5 packets — the device requires them
-    before each operation, even if the session was already open."""
+    before each operation, even if the session was already open.
+
+    After the first handshake of a connection the magic is also PRIMED (spec 13):
+    the pedal drops the next magic, so it is sent once more, unanswered, before
+    the real sequence.
+    """
     t = MockTransport()
-    t.responses = [b"ok"] * 10  # 5 for each handshake
+    t.responses = [b"ok"] * 20
     s = Session(t)
     s.handshake()
-    n = len(t.sent)  # 5 paquetes
+    n = len(t.sent)                       # 5 packets: a fresh session is answered at once
+    assert s._handshaken
 
     s.handshake()
-    assert len(t.sent) == n + 5  # 5 more packets from the second handshake
+    assert len(t.sent) == n + 6           # 5 + the priming magic
+    assert t.sent[n] == packets.HANDSHAKE_SEQUENCE[0]   # the prime comes first
+    assert t.sent[n + 1] == packets.HANDSHAKE_SEQUENCE[0]  # then the real sequence
     assert s.is_open
 
 
@@ -356,6 +364,18 @@ def test_set_param_preserves_the_wire_type():
     assert pod.set_param(block_index=7, param_idx=2, value=1.5) is True
     sent = packets.decode_open_body(t.sent[0])[101][119]
     assert isinstance(sent, float) and sent == pytest.approx(1.5)
+
+
+def test_select_block_sends_op78_with_the_block_index():
+    """Spec 12: POD Go Edit selects a block with op 78, {101: {98: block}}."""
+    pod, t = _make_pod_with_mock()
+    t.responses = [b"\x00" * 16, _ok_resp(), b"\x00" * 16]
+
+    assert pod.select_block(7) is True
+
+    body = packets.decode_open_body(t.sent[0])
+    assert body[100] == 78
+    assert body[101] == {98: 7}
 
 
 def test_device_change_preset_uses_read_channel():
@@ -480,3 +500,41 @@ def test_send_write_without_echo_drains_until_the_timeout():
 
     assert ws.send_write({100: 30, 101: {}}) == b""
     assert t.reads == 3  # the two acks + the read that times out
+
+
+# --- refused writes must resync the stream cursor (spec 14) ---
+
+
+def _refused_resp() -> bytes:
+    return _write_resp_from({102: 1001, 103: 255, 104: {111: -3}})
+
+
+def test_refused_write_is_resent_at_the_rewound_cursor():
+    """A refused command does not advance the pedal's cursor, so the retry must
+    use the SAME cursor (idempotent) instead of the advanced one — otherwise
+    every later write is mispositioned ("the pedal did not select block N")."""
+    pod, t = _make_pod_with_mock()
+    t.responses = [
+        b"\x00" * 16, _refused_resp(), b"\x00" * 16,
+        b"\x00" * 16, _ok_resp(), b"\x00" * 16,
+    ]
+
+    assert pod.select_block(6) is True
+
+    assert len(t.sent) == 2
+    first, second = t.sent
+    assert first[12:16] == second[12:16]          # same stream cursor
+    assert packets.decode_open_body(first)[100] == 78
+    assert packets.decode_open_body(second)[100] == 78
+    assert packets.decode_open_body(second)[101] == {98: 6}
+
+
+def test_write_gives_up_after_three_refusals():
+    pod, t = _make_pod_with_mock()
+    pod.write_connect = lambda: None               # no handshake in this test
+    t.responses = [b"\x00" * 16, _refused_resp(), b"\x00" * 16] * 3
+
+    assert pod.select_block(6) is False
+    assert len(t.sent) == 3
+    cursors = {pkt[12:16] for pkt in t.sent}
+    assert len(cursors) == 1                       # always the same cursor

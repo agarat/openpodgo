@@ -18,7 +18,7 @@ presets and UI are platform-agnostic.
 
 ```bash
 . .venv/bin/activate                   # activate the venv (always first)
-python -m pytest                       # 357 tests, all OFFLINE (no pedal)
+python -m pytest                       # 364 tests, all OFFLINE (no pedal)
 python -m pytest tests/test_editor.py  # a single file
 python -m pytest tests/test_editor.py::test_nombre   # a single test
 python -m openpodgo.app                 # launch the UI (or: openpodgo)
@@ -100,6 +100,19 @@ spec in the roadmap. The RE protocol lives in `docs/protocol.md` and
 `build_catalog.py`). `captures/` and `res/` contain RE data and the official
 POD Go Edit assets (these are **not published**).
 
+## Performance (spec 13)
+
+- **Each read needs its own handshake** (~400 ms, the session cannot be reused
+  for a second read), so an operation costs ~600 ms. After the first handshake
+  of a connection the pedal ignores the magic: `Session._prime()` sends it once
+  more (unanswered) or every operation pays a failed attempt + 300 ms backoff
+  (~1.2 s). Don't remove the priming; it is the difference between 1.2 s and
+  0.6 s per operation.
+- Reuse one session for what a single response can provide (the setlist names
+  come free in the `OPEN_PRESETS` answer of the preset stream:
+  `device.list_presets_and_setlists`). App-level costs: connect ~2.5 s, preset
+  switch ~1.6 s, live-sync re-read ~1.3 s.
+
 ## Write protocol (spec 03)
 
 `set_param` works as follows: raw `block_index`, `param_idx` goes in key 28 of
@@ -128,6 +141,18 @@ Verified live rules that decide whether a write is applied (all bit us — see
   write handshake.
 - The UI writes on **every** change (coalesced ~80 ms, flushed on release), and
   `_save_to_pedal` flushes the editor's parameters before op 71.
+- **A refused write leaves the cursor desynced**: the pedal does not advance its
+  stream cursor for a command it refuses, while `send_write` does — so one
+  refusal makes every later write mispositioned (bursts of "the pedal did not
+  select block N"). One-shot write commands go through
+  `PodGo._write_command()`, which rewinds the cursor, resends, and only then
+  re-handshakes (spec 14).
+- **Selecting a block on the pedal is op 78**: `{102: tx, 100: 78, 101: {98:
+  block}}` with the same raw block index as `set_param` (found in a USBPcap
+  capture of POD Go Edit; `device.select_block`, sent on every selection). Op 33
+  is a *read* of the block descriptor and does NOT select anything. Careful:
+  brute-forcing unknown opcodes can HANG the pedal's vendor endpoint (`op >= 93`;
+  only a physical power cycle recovers it) — see `docs/specs/12-block-focus.md`.
 - In the pedal's `set_param` **notifications** (op 30: a physical knob turn and
   the echo of our own write) the parameter index is **key 28**; key 26 is 0.
   Read it with `notifications._param_index()` — reading 26 made every event look
