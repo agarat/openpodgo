@@ -53,3 +53,37 @@ an entire preset. (Preset/snapshot switching via **MIDI** already works:
 
 Change a parameter from the app and see/hear it change on the pedal, without
 corrupting the preset, with the app and pedal showing the same value.
+
+## Resolved: on-wire rules for `set_param` (op 30, key 119)
+
+Verified live against the pedal (firmware 2.01). These rules decide whether a
+write is applied or silently discarded — each one bit us in the UI:
+
+1. **The value's MessagePack type must match the parameter's stored type.**
+   An int parameter (cab `Mic`) applies `119: 8` and answers `103: 255,
+   104: {111: -3}` for `119: 8.0`; a float parameter (`Distance`) is the exact
+   opposite. So the editor keeps the on-wire type (`PresetEditor.set_param`)
+   and the UI passes that value through instead of `float(value)`.
+2. **Bool parameters are not writable through op 30.** `true`/`false`, `1`/`0`
+   and `1.0`/`0.0` all answer 255. They stay in-memory/exported (`.pgp`) only;
+   the UI skips them instead of reporting a failure.
+3. **The response is the framed echo, and it echoes the command's tx id
+   (`k102`).** It arrives in ~2 ms; the 16 B acks arrive 100–250 ms later and
+   carry no status. Draining until timeout cost ~420 ms per write (a 50-param
+   save took 23 s); `WriteSession.send_write` now stops at its own echo and
+   leaves the acks for the next drain.
+4. **Reads do not invalidate the write channel.** A write right after a read,
+   or right after a preset change, applies with the current cursor (verified
+   with 50 interleaved writes). `_read_since_write` is now only a recovery
+   flag, set when a write fails. The exception is a full chain dump (op 21):
+   it does force a fresh write handshake because the flow control desyncs.
+5. **The write must hold the transport lock.** The IN endpoint is shared with
+   the read and event channels: the live-sync poller was reading our echo
+   between write and drain, so the first attempt failed with "no response from
+   channel …" and only the retry (which reconnects) applied it. `send_write`
+   and `send_write_chunked` now hold `transport.lock` (reentrant) for the whole
+   write→drain sequence.
+
+Result: ~20 ms per parameter write, and the whole editor's 50 parameters are
+flushed before a save in ~1 s.
+

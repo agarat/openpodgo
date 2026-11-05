@@ -44,6 +44,9 @@ class PresetStream:
     chunks: int
     #: Per-chunk individual buffers, useful for labeling captures.
     chunk_payloads: list[bytes] = field(default_factory=list)
+    #: Setlist names, taken for free from the OPEN_PRESETS response that opens
+    #: this stream (one handshake yields both, instead of two operations).
+    setlists: list[str] = field(default_factory=list)
 
 
 def read_setlists(session: Session) -> list[str]:
@@ -100,8 +103,11 @@ def stream_presets(session: Session, setlist: int = 0) -> PresetStream:
     session.handshake()
     t = session.transport
 
-    # Open the preset resource and start streaming the requested setlist.
-    t.request(packets.OPEN_PRESETS)
+    # Open the preset resource and start streaming the requested setlist. That
+    # response also carries the setlist table, so it is parsed here instead of
+    # spending a second handshake on `read_setlists`.
+    open_resp = t.request(packets.OPEN_PRESETS)
+    setlists = parse_setlists(open_resp)
     session.advance_seq()
     ack = t.request(packets.build_open_stream(setlist))
     session.advance_seq()
@@ -157,7 +163,9 @@ def stream_presets(session: Session, setlist: int = 0) -> PresetStream:
     # synchronized way (draining halfway here desyncs).
 
     log.info("Preset stream: %d chunks, %d bytes", chunks, len(raw))
-    return PresetStream(raw=bytes(raw), chunks=chunks, chunk_payloads=payloads)
+    return PresetStream(
+        raw=bytes(raw), chunks=chunks, chunk_payloads=payloads, setlists=setlists
+    )
 
 
 #: Name key (109) encoded as uint16 MessagePack: cd 00 6d.

@@ -46,6 +46,10 @@ class Session:
         self.transport = transport
         self._seq = packets.FIRST_APP_SEQ
         self._open = False
+        #: Has a handshake already run on this connection? Only the FIRST one on
+        #: a fresh connection is answered at once; every later one needs the
+        #: priming magic (see `_prime`).
+        self._handshaken = False
 
     @property
     def seq(self) -> int:
@@ -62,22 +66,56 @@ class Session:
     #: retry instead of waiting 2 s per packet.
     HANDSHAKE_TIMEOUT_MS = 300
 
+    #: How long to wait for the answer to the priming magic. The pedal does not
+    #: answer it (it is a reset), so this only bounds the call.
+    PRIME_READ_MS = 20
+
+    def _prime(self) -> None:
+        """Send the reset magic that the pedal ignores.
+
+        Measured live (fw 2.01): on a FRESH connection the device answers the
+        handshake magic immediately, but after any completed handshake it
+        silently drops the next magic — the retry (300 ms later) is answered in
+        1 ms. That cost one failed attempt plus the exponential backoff on
+        EVERY operation: ~660 ms of dead time per read (a preset load does
+        several), and it showed up as "the app syncs slowly".
+
+        Sending the magic once more, without waiting for it, gets the device
+        back to the state where the real sequence is answered: handshake ~400 ms
+        instead of ~1000 ms. Caller holds the transport lock.
+        """
+        self.transport.write(packets.HANDSHAKE_SEQUENCE[0])
+        time.sleep(0.01)
+        try:
+            self.transport.read(self.PRIME_READ_MS)  # swallow a stray answer
+        except TransportError:
+            pass
+
     def handshake(self) -> None:
         """Execute the 5-packet init with drain + exponential backoff.
 
         The device requires this handshake before each major operation
-        (list_setlists, stream_presets, read_object). The first attempt
-        usually fails because the device is still processing the previous
-        response; drain + 300 ms backoff + second attempt always works.
+        (list_setlists, stream_presets, read_object); the session cannot be
+        reused for a second read. After the first handshake of a connection the
+        magic is primed (`_prime`) so the sequence is answered on the first
+        attempt instead of after a 300 ms backoff.
         """
         last_exc: Exception | None = None
         for attempt in range(MAX_INIT_ATTEMPTS):
             try:
-                self.transport.drain()
-                for pkt in packets.HANDSHAKE_SEQUENCE:
-                    self.transport.request(pkt, timeout_ms=self.HANDSHAKE_TIMEOUT_MS)
+                # Locked: the drain clears the whole IN endpoint, and another
+                # channel's response arriving meanwhile must not be consumed.
+                with self.transport.lock:
+                    self.transport.drain()
+                    if self._handshaken:
+                        self._prime()
+                    for pkt in packets.HANDSHAKE_SEQUENCE:
+                        self.transport.request(
+                            pkt, timeout_ms=self.HANDSHAKE_TIMEOUT_MS
+                        )
                 self._seq = packets.FIRST_APP_SEQ
                 self._open = True
+                self._handshaken = True
                 log.info("Handshake completed (attempt %d)", attempt + 1)
                 return
             except TransportError as exc:
@@ -140,6 +178,17 @@ class WriteSession:
     def cursor(self) -> int:
         return self._cursor
 
+    def rewind_to(self, cursor: int) -> None:
+        """Put the stream cursor back before a command the pedal did NOT apply.
+
+        The pedal validates the cursor: a command it refuses does not advance
+        its own position, while `send_write` always advances ours. Resending at
+        the rewound cursor is idempotent (same command, same position), so a
+        refused command is retried there instead of leaving every later write
+        mispositioned — the "the pedal did not select block N" burst (spec 14).
+        """
+        self._cursor = cursor
+
     def advance_seq(self) -> int:
         current = self._seq
         self._seq = (self._seq + 1) & 0xFF
@@ -152,16 +201,21 @@ class WriteSession:
         WRITE_OPEN_2 cursor plus its response advance (the device responds
         with object 76). After that set_param works without having to dump
         the full preset via the write channel.
+
+        Holds the transport lock for the whole sequence: the IN endpoint is
+        shared with the read and event channels, so a concurrent event poll
+        between two handshake packets would steal a response.
         """
         open2_cursor = int.from_bytes(self.WRITE_OPEN_2[12:16], "little")
         last_exc: Exception | None = None
         for attempt in range(MAX_INIT_ATTEMPTS):
             try:
-                self.transport.drain()  # clear residual keepalives from the read channel
-                resp = b""
-                for pkt in (self.WRITE_HANDSHAKE, self.WRITE_OPEN_1,
-                            self.WRITE_CHUNK_1, self.WRITE_OPEN_2):
-                    resp = self.transport.request(pkt)
+                with self.transport.lock:
+                    self.transport.drain()  # clear residual keepalives
+                    resp = b""
+                    for pkt in (self.WRITE_HANDSHAKE, self.WRITE_OPEN_1,
+                                self.WRITE_CHUNK_1, self.WRITE_OPEN_2):
+                        resp = self.transport.request(pkt)
                 self._seq = 0x05
                 self._cursor = open2_cursor + packets.write_cursor_advance(resp)
                 self._open = True
@@ -193,26 +247,40 @@ class WriteSession:
     def send_write(self, payload: dict, cmd: int = 0x04) -> bytes:
         """Send a write command at the current cursor and return its echoed status.
 
-        The device autonomously responds with several frames: 16 B acks
-        (cmd=0x10/0x08, no status) and a framed echo of ~48 B with
-        `{102, 103, 104}` that carries the status. ALL must be drained:
-        leaving one unread desynchronizes the next command (it reads the old
-        response). Advances the cursor by the request footprint (8 + body_len);
-        keeping it synchronized is what makes the device apply the change
-        instead of just ACKing it.
+        The device responds with several frames: a framed echo of ~48 B with
+        `{102, 103, 104}` that carries the status, and 16 B acks
+        (cmd=0x10/0x08) without one. Measured on the pedal: the echo arrives in
+        ~2 ms and the acks ~100-250 ms later, so waiting for the acks costs
+        ~250 ms (one timeout) PER WRITE — a 50-parameter save took ~23 s.
+
+        The echo repeats the command's tx id (k102), so the drain stops at OUR
+        echo and does not wait for the acks: they hold no status, the next
+        drain consumes them, and anything left over on the IN endpoint is
+        discarded by the channel filter of the read path. Advances the cursor by
+        the request footprint (8 + body_len); keeping it synchronized is what
+        makes the device apply the change instead of just ACKing it.
         """
         seq = self.advance_seq()
         pkt = packets.build_vendor_write(payload, seq=seq, cmd=cmd, cursor=self._cursor)
-        self.transport.write(pkt)
         self._cursor += 8 + int.from_bytes(pkt[20:22], "little")
+        tx_id = payload.get(102)
         echo = b""
-        while True:
-            try:
-                resp = self.transport.read(self.WRITE_DRAIN_MS)
-            except TransportError:
-                break
-            if len(resp) > 24 and resp[16:20] in packets.WRITE_FRAMED_SUBHEADERS:
-                echo = resp  # the framed frame carries the status
+        # The lock spans write + drain: an event poll running in between would
+        # read (and steal) this command's echo, making the write fail.
+        with self.transport.lock:
+            self.transport.write(pkt)
+            while True:
+                try:
+                    resp = self.transport.read(self.WRITE_DRAIN_MS)
+                except TransportError:
+                    break
+                if len(resp) > 24 and resp[16:20] in packets.WRITE_FRAMED_SUBHEADERS:
+                    echo = resp  # the framed frame carries the status
+                    body = packets.decode_open_body(resp)
+                    if tx_id is None or (
+                        isinstance(body, dict) and body.get(102) == tx_id
+                    ):
+                        break
         return echo
 
     def send_write_chunked(self, payload: dict, cmd: int = 0x04) -> bytes:
@@ -238,17 +306,20 @@ class WriteSession:
         log.debug("send_write_chunked: %d frames, %d B body, cursor=%#08x",
                   len(frames), len(body), self._cursor)
         echo = b""
-        for i, frame in enumerate(frames):
-            log.debug("  OUT[%d] %s", i, _frame_desc(frame))
-            self.transport.write(frame)
-            while True:
-                try:
-                    resp = self.transport.read(self.WRITE_CHUNK_DRAIN_MS)
-                except TransportError:
-                    break
-                log.debug("  IN      %s", _frame_desc(resp))
-                if len(resp) > 24 and resp[16:20] in packets.WRITE_FRAMED_SUBHEADERS:
-                    echo = resp
+        # One lock for the whole dump: the frames belong to one message and a
+        # concurrent event poll could read them as its own responses.
+        with self.transport.lock:
+            for i, frame in enumerate(frames):
+                log.debug("  OUT[%d] %s", i, _frame_desc(frame))
+                self.transport.write(frame)
+                while True:
+                    try:
+                        resp = self.transport.read(self.WRITE_CHUNK_DRAIN_MS)
+                    except TransportError:
+                        break
+                    log.debug("  IN      %s", _frame_desc(resp))
+                    if len(resp) > 24 and resp[16:20] in packets.WRITE_FRAMED_SUBHEADERS:
+                        echo = resp
         self._cursor += 8 + len(body)
         log.debug("send_write_chunked: fin, echo len=%d", len(echo))
         return echo
@@ -299,10 +370,11 @@ class EventSession:
         last_exc: Exception | None = None
         for attempt in range(MAX_INIT_ATTEMPTS):
             try:
-                self.transport.drain()
-                for pkt in (packets.EVENT_HANDSHAKE, packets.EVENT_OPEN,
-                            packets.EVENT_CHUNK):
-                    self.transport.request(pkt)
+                with self.transport.lock:
+                    self.transport.drain()
+                    for pkt in (packets.EVENT_HANDSHAKE, packets.EVENT_OPEN,
+                                packets.EVENT_CHUNK):
+                        self.transport.request(pkt)
                 self._seq = 0x04
                 self._cursor = packets.EVENT_REST_CURSOR
                 self._open = True

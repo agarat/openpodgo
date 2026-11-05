@@ -26,13 +26,30 @@ def _notif(body_dict: dict, src: int = NOTIF_SRC, dst: int = NOTIF_DST) -> bytes
 
 
 def test_set_param():
+    # Body captured live from the pedal (physical knob turn AND the echo of our
+    # own op 30 write): the parameter index travels in key 28, key 26 is 0.
     raw = _notif({105: 30, 106: {82: 0, 68: 6, 121: 20,
-                                 106: {98: 3, 29: True, 26: 5, 28: 0, 119: 0.5}}})
+                                 106: {98: 3, 29: True, 26: 0, 28: 5, 119: 0.5}}})
     ev = parse_notification(raw)
     assert ev["type"] == "set_param"
     assert ev["data"]["block"] == 3
     assert ev["data"]["param"] == 5
     assert abs(ev["data"]["value"] - 0.5) < 1e-6
+
+
+def test_set_param_reads_the_index_from_key_28():
+    """Regression: reading key 26 gave 0 for every parameter, so the UI applied
+    each changed value to the block's FIRST parameter (verified live)."""
+    raw = _notif({105: 30, 106: {82: 0, 68: 6, 121: 20,
+                                 106: {98: 7, 29: True, 26: 0, 28: 3, 119: 0.25}}})
+    assert parse_notification(raw)["data"]["param"] == 3
+
+
+def test_set_param_accepts_the_older_key_26_shape():
+    """Key 28 absent (older documented shape): fall back to key 26."""
+    raw = _notif({105: 30, 106: {82: 0, 68: 6, 121: 20,
+                                 106: {98: 3, 29: True, 26: 2, 119: 0.5}}})
+    assert parse_notification(raw)["data"]["param"] == 2
 
 
 def test_snapshot():

@@ -47,6 +47,11 @@ class EditorView(QWidget):
     #: emitted after reordering the chain in memory; MainWindow dumps the
     #: complete blob to the pedal (op 21) in the background.
     chain_write_requested = Signal()
+    #: the pedal refused a parameter value written from the Edit panel.
+    write_failed = Signal(str)
+    #: slot (int) or "input"/"output" selected by the user in the chain: the
+    #: pedal's own edit view follows it (op 33), so its knobs act on that block.
+    block_selected = Signal(object)
 
     def __init__(self) -> None:
         super().__init__()
@@ -100,6 +105,7 @@ class EditorView(QWidget):
         self.inspector.bypass_toggled.connect(self.toggle_bypass)
         self.inspector.model_chosen.connect(self.apply_model)
         self.inspector.clear_requested.connect(self.clear_slot)
+        self.inspector.write_failed.connect(self.write_failed)
         self.inspector.header.bypass_btn.toggled.connect(self._toggle_bypass_panel)
         root.addWidget(self.inspector, 1)
 
@@ -135,6 +141,9 @@ class EditorView(QWidget):
         """
         prev_selected = self._selected
         prev_modified = self.modified
+        # Writes queued against the previous preset must never reach the pedal
+        # once another preset is loaded (the block indices would point at it).
+        self.inspector.edit.cancel_pending_writes()
         self.editor = editor
         self.preset_name = name
         self.slot_text = slot_text
@@ -250,11 +259,13 @@ class EditorView(QWidget):
     def select_slot(self, slot: int) -> None:
         self._selected = slot
         self._refresh()
+        self.block_selected.emit(slot)
 
     def select_io(self, io: str) -> None:
         """Selects the Input/Output block to edit its params (#2)."""
         self._selected = io
         self._refresh()
+        self.block_selected.emit(io)
 
     def toggle_bypass(self, slot: int) -> None:
         block = self.editor.preset.chain[slot]

@@ -1,7 +1,7 @@
 [project]
 name = "openpodgo"
 dynamic = ["version"]
-description = "Open-source editor for the Line 6 POD Go on Linux (a POD Go Edit clone)"
+description = "Open-source editor for the Line 6 POD Go on Linux and macOS (a POD Go Edit clone)"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -9,9 +9,11 @@ authors = [{ name = "the OpenPODGo contributors" }]
 keywords = ["line6", "pod-go", "helix", "guitar", "usb", "midi", "reverse-engineering"]
 classifiers = [
     "Development Status :: 3 - Alpha",
+    "Environment :: MacOS X :: Cocoa",
     "Environment :: X11 Applications :: Qt",
     "Intended Audience :: End Users/Desktop",
     "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
     "Topic :: Multimedia :: Sound/Audio",

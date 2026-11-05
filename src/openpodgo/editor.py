@@ -236,14 +236,21 @@ class PresetEditor:
     # --- mutations ---
 
     def set_param(self, slot: int, idx: int, value) -> None:
-        """Change a parameter, preserving the on-wire type of the current value."""
+        """Change a parameter, preserving the on-wire type of the current value.
+
+        The type is not cosmetic: the pedal rejects a write whose k119 type
+        does not match what it stores (`103: 255`) — an int parameter refuses
+        floats and vice versa (see `device.set_param`). So a value arriving as
+        a float for an int parameter is rounded here, and the stored (typed)
+        value is what the UI sends to the pedal.
+        """
         self._checkpoint(tag=("param", slot, idx))
         values = self.params_node(slot)[l6helix.PARAMS_VALUES]
         old = values[idx]
         if isinstance(old, bool):
             values[idx] = bool(value)
-        elif isinstance(old, int) and not isinstance(value, float):
-            values[idx] = int(value)
+        elif isinstance(old, int):
+            values[idx] = int(round(float(value)))
         else:
             values[idx] = float(value)
 
@@ -322,14 +329,17 @@ class PresetEditor:
         return list(self._io_payload(io)[l6helix.IO_PARAMS][l6helix.PARAMS_VALUES])
 
     def set_io_param(self, io: str, idx: int, value) -> None:
-        """Change an Input/Output param, preserving its on-wire type."""
+        """Change an Input/Output param, preserving its on-wire type.
+
+        Same rule as `set_param`: the typed value is what the pedal accepts.
+        """
         self._checkpoint(tag=("io", io, idx))
         values = self._io_payload(io)[l6helix.IO_PARAMS][l6helix.PARAMS_VALUES]
         old = values[idx]
         if isinstance(old, bool):
             values[idx] = bool(value)
-        elif isinstance(old, int) and not isinstance(value, float):
-            values[idx] = int(value)
+        elif isinstance(old, int):
+            values[idx] = int(round(float(value)))
         else:
             values[idx] = float(value)
 

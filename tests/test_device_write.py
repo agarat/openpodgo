@@ -1,6 +1,8 @@
 """Offline write API tests: verifies packet construction
 without needing a pedal."""
 
+import threading
+
 import pytest
 
 from openpodgo import packets
@@ -87,6 +89,8 @@ def test_send_write_chunked_emits_op21(monkeypatch):
     sent: list[bytes] = []
 
     class FakeTransport:
+        lock = threading.RLock()  # same contract as UsbTransport
+
         def write(self, pkt):
             sent.append(pkt)
 

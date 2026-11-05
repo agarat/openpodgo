@@ -4,23 +4,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What is this
 
-Open-source editor for **Line 6 POD Go on Linux** — a clone of POD Go Edit.
+Open-source editor for **Line 6 POD Go on Linux and macOS** — a clone of POD Go Edit.
 It communicates with the pedal via the USB vendor protocol of the Helix/HX
 family (bulk transfers + presets in MessagePack), reverse-engineered by the
 community (openhx, helix_usb) and adapted to POD Go (`0e41:4247`).
+
+Platform-specific code is deliberately confined to two seams: `platform_support.py`
+(OS detection, libusb lookup, user-facing hints) and the MIDI backends
+(`midi_alsa.py` for Linux, `midi_coremidi.py` for macOS). The protocol,
+presets and UI are platform-agnostic.
 
 ## Commands
 
 ```bash
 . .venv/bin/activate                   # activate the venv (always first)
-python -m pytest                       # 261 tests, all OFFLINE (no pedal)
+python -m pytest                       # 364 tests, all OFFLINE (no pedal)
 python -m pytest tests/test_editor.py  # a single file
 python -m pytest tests/test_editor.py::test_nombre   # a single test
 python -m openpodgo.app                 # launch the UI (or: openpodgo)
 ```
 
-Installation: `pip install -e '.[dev,ui]'`. USB access without sudo: copy
-`99-podgo.rules` to `/etc/udev/rules.d/` and reload udev (see README).
+Installation: `pip install -e '.[dev,ui]'`. Linux needs `libusb-1.0-0`, `alsa-utils`
+(`amidi`) and the udev rule (`99-podgo.rules` → `/etc/udev/rules.d/`, see README);
+macOS needs `libusb` (`brew install libusb`) and nothing else — MIDI goes through
+CoreMIDI and there are no udev rules.
 
 **Important about tests:** all tests run without the pedal (mocks/fixtures from
 real captures). Hardware verification is manual and done by the pedal owner;
@@ -72,8 +79,14 @@ UI (`src/openpodgo/ui/`, PySide6, dark theme): `main_window.py` orchestrates;
 reads the IN endpoint in the background for bidirectional live-sync (pedal
 changes → UI). It pauses/resumes to avoid competing with writes.
 
-- **`midi.py`** — MIDI commands via ALSA through `amidi -S` (PC, CC32 setlist,
-  snapshots, footswitches, tap). No extra native dependencies.
+- **`midi.py`** — MIDI commands (PC, CC32 setlist, snapshots, footswitches,
+  tap) on top of a `MidiBackend` selected per OS by `default_backend()`:
+  `midi_alsa.py` shells out to `amidi -S` (Linux), `midi_coremidi.py` talks to
+  CoreMIDI through `ctypes` (macOS). Neither adds a native dependency, and
+  `MidiOut` (the public API used by the UI) stays platform-agnostic.
+- **`platform_support.py`** — the only place that inspects `sys.platform`:
+  OS name, `has_kernel_driver()` (udev detach on Linux), `find_libusb()` (with
+  the macOS Homebrew/MacPorts paths) and the hints shown in the status bar.
 
 ## How the project grows
 
@@ -87,6 +100,19 @@ spec in the roadmap. The RE protocol lives in `docs/protocol.md` and
 `build_catalog.py`). `captures/` and `res/` contain RE data and the official
 POD Go Edit assets (these are **not published**).
 
+## Performance (spec 13)
+
+- **Each read needs its own handshake** (~400 ms, the session cannot be reused
+  for a second read), so an operation costs ~600 ms. After the first handshake
+  of a connection the pedal ignores the magic: `Session._prime()` sends it once
+  more (unanswered) or every operation pays a failed attempt + 300 ms backoff
+  (~1.2 s). Don't remove the priming; it is the difference between 1.2 s and
+  0.6 s per operation.
+- Reuse one session for what a single response can provide (the setlist names
+  come free in the `OPEN_PRESETS` answer of the preset stream:
+  `device.list_presets_and_setlists`). App-level costs: connect ~2.5 s, preset
+  switch ~1.6 s, live-sync re-read ~1.3 s.
+
 ## Write protocol (spec 03)
 
 `set_param` works as follows: raw `block_index`, `param_idx` goes in key 28 of
@@ -94,3 +120,40 @@ the body, uses the **write channel** cursor, and `request()` filters by channel.
 Chain writing (op 21, block reorder) responds `{102,103:1,104}` while
 `set_param`/`save` echo `103: 0` (see `_chain_write_ok`).
 `save_preset` has retry. Details in `docs/specs/03-write-to-device.md`.
+
+Verified live rules that decide whether a write is applied (all bit us — see
+`docs/specs/11-param-write-pipeline.md`):
+
+- **`k119` must carry the parameter's on-wire MessagePack type.** An int
+  parameter rejects `8.0` (`103: 255, 104: {111: -3}`) and a float one rejects
+  `1`. Never `float(value)` a value on its way to the pedal: the editor keeps
+  the type (`PresetEditor.set_param`) and the UI forwards it.
+- **Bool parameters are not writable via op 30** (255 for `true/false`,
+  `1/0`, `1.0/0.0`): keep them in memory/`.pgp` and skip them when writing.
+- **The status arrives first**: the framed echo (echoes our tx id `k102`) comes
+  in ~2 ms; the 16 B acks 100–250 ms later and carry no status. `send_write`
+  stops at its own echo (~20 ms/write) instead of draining to a timeout.
+- **Writes hold `transport.lock`** (reentrant): the IN endpoint is shared with
+  the read and event channels, and the live-sync poller otherwise steals the
+  echo (symptom: first attempt fails with "no response from channel …").
+- Reads do **not** invalidate the write channel (`_read_since_write` is only a
+  recovery flag); a full chain dump (op 21) is the exception and forces a fresh
+  write handshake.
+- The UI writes on **every** change (coalesced ~80 ms, flushed on release), and
+  `_save_to_pedal` flushes the editor's parameters before op 71.
+- **A refused write leaves the cursor desynced**: the pedal does not advance its
+  stream cursor for a command it refuses, while `send_write` does — so one
+  refusal makes every later write mispositioned (bursts of "the pedal did not
+  select block N"). One-shot write commands go through
+  `PodGo._write_command()`, which rewinds the cursor, resends, and only then
+  re-handshakes (spec 14).
+- **Selecting a block on the pedal is op 78**: `{102: tx, 100: 78, 101: {98:
+  block}}` with the same raw block index as `set_param` (found in a USBPcap
+  capture of POD Go Edit; `device.select_block`, sent on every selection). Op 33
+  is a *read* of the block descriptor and does NOT select anything. Careful:
+  brute-forcing unknown opcodes can HANG the pedal's vendor endpoint (`op >= 93`;
+  only a physical power cycle recovers it) — see `docs/specs/12-block-focus.md`.
+- In the pedal's `set_param` **notifications** (op 30: a physical knob turn and
+  the echo of our own write) the parameter index is **key 28**; key 26 is 0.
+  Read it with `notifications._param_index()` — reading 26 made every event look
+  like parameter 0 (a knob change moved the block's first parameter).

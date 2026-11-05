@@ -18,7 +18,7 @@ PodGo Lab code (June 2026).
 | C-01 | Bulk USB transport (5-packet handshake, session) | ✅ | `usb_transport.py`, `session.py` |
 | C-02 | Streaming + preset parsing (MessagePack) | ✅ | `preset.py`, pattern scan |
 | C-03 | PodGo API (connect, list_setlists, list_presets) | ✅ | `device.py` |
-| C-04 | MIDI via ALSA (PC, CC32, snapshots, FS, tap) | ✅ | `midi.py`, via `amidi` |
+| C-04 | MIDI (PC, CC32, snapshots, FS, tap) | ✅ | `midi.py` over ALSA (`amidi`, Linux) or CoreMIDI (macOS) |
 | C-05 | 571-model catalog from official resources | ✅ 🔬 | `catalog.py` + `data/models.json`. Validate against pedal. |
 | C-06 | Write to pedal (set_param, set_model, save, change_preset) | ✅ 🔬 | `device.py` + `session.py` (WriteSession). Pending visual verification. |
 | C-07 | Bidirectional live sync (EventSession + NotificationReader) | ✅ 🔬 | `notifications.py` + dispatcher in `main_window.py`. 23 tests. |

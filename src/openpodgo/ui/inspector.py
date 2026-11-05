@@ -16,7 +16,7 @@ from functools import lru_cache
 
 log = logging.getLogger(__name__)
 
-from PySide6.QtCore import QSize, Qt, Signal
+from PySide6.QtCore import QSize, Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QIcon, QPainter
 from PySide6.QtWidgets import (
     QButtonGroup,
@@ -278,7 +278,20 @@ class ParamRow:
 
 
 class EditPanel(QWidget):
-    """Parameter grid of the block, in its category color."""
+    """Parameter grid of the block, in its category color.
+
+    Every edit is mirrored to the pedal (``device.set_param``, op 30) through a
+    small coalescing queue: the pedal takes one write per value, so a slider
+    drag would flood the write channel. Whatever the input method (drag, wheel,
+    arrow keys, typed value, combo) the change is queued, written at most every
+    `WRITE_INTERVAL_MS` and flushed at once when the interaction ends.
+    """
+
+    #: Emitted when the pedal refuses a value, for the status bar.
+    write_failed = Signal(str)
+
+    #: Coalescing window for continuous edits (~12 writes/s at most).
+    WRITE_INTERVAL_MS = 80
 
     def __init__(self) -> None:
         super().__init__()
@@ -287,12 +300,22 @@ class EditPanel(QWidget):
         self._lay.setSpacing(6)
         self._lay.addStretch(1)
         self.rows: list[ParamRow] = []
+        #: PodGo used for writes; refreshed on every rebuild (None = offline).
+        self._device = None
+        #: (raw block index, param idx) → (value, label) waiting for the pedal.
+        self._pending: dict[tuple[int, int], tuple[float, str]] = {}
+        self._timer = QTimer(self)
+        self._timer.setSingleShot(True)
+        self._timer.setInterval(self.WRITE_INTERVAL_MS)
+        self._timer.timeout.connect(self.flush_writes)
 
     def rebuild(self, editor: PresetEditor, slot: int, block, on_modified,
                 color: str, device=None) -> None:
         self.clear()
+        self._device = device
         md = catalog.lookup(block.model_id)
         info = catalog.model_info(md.name) if md else None
+        block_index = self._block_index(editor, slot)
         for idx, value in enumerate(block.params):
             if md and idx < len(md.params):
                 pname = md.params[idx]
@@ -300,32 +323,15 @@ class EditPanel(QWidget):
             else:
                 pname, spec = f"P{idx + 1}", None
 
-            def changed(v, i=idx):
+            def changed(v, i=idx, label=pname):
                 editor.set_param(slot, i, v)
                 on_modified()
-
-            def write_param(i=idx):
-                if device is None:
-                    return
-                try:
-                    blk_idx = editor.block_index(slot)
-                    val = float(editor.preset.chain[slot].params[i])
-                    log.info("write_param slot=%d idx=%d val=%.4f", slot, i, val)
-                    device.set_param(block_index=blk_idx, param_idx=i, value=val)
-                except (ValueError, RuntimeError) as exc:
-                    log.warning("write_param error: %s", exc)
+                self._queue_write(
+                    block_index, i, editor.preset.chain[slot].params[i], label
+                )
 
             row = ParamRow(pname.lstrip("@"), value, spec, changed)
-            if row.spin is not None:
-                row.widget.sliderReleased.connect(write_param)
-                row.widget.sliderReleased.connect(editor.end_gesture)
-                row.spin.editingFinished.connect(write_param)
-            elif row.combo is not None:
-                # Each enum selection is a discrete commit: write right away.
-                row.combo.currentIndexChanged.connect(write_param)
-                row.combo.currentIndexChanged.connect(
-                    lambda _i: editor.end_gesture()
-                )
+            self._connect_write(row, editor)
             self.rows.append(row)
             self._lay.insertWidget(self._lay.count() - 1, self._row_widget(row))
         self._apply_color(color)
@@ -334,38 +340,100 @@ class EditPanel(QWidget):
                    color: str, device=None) -> None:
         """Parameter rows of the Input/Output block (#2)."""
         self.clear()
+        self._device = device
         values = editor.io_values(io)
+        block_index = self._block_index(editor, io)
         for idx, (_sym, label, spec) in enumerate(catalog.io_param_meta(io)):
             value = values[idx] if idx < len(values) else 0.0
 
-            def changed(v, i=idx):
+            def changed(v, i=idx, label=label):
                 editor.set_io_param(io, i, v)
                 on_modified()
-
-            def write_param(i=idx):
-                if device is None:
-                    return
-                try:
-                    blk_idx = editor.io_block_index(io)
-                    val = float(editor.io_values(io)[i])
-                    log.info("write io=%s idx=%d val=%.4f", io, i, val)
-                    device.set_param(block_index=blk_idx, param_idx=i, value=val)
-                except (ValueError, RuntimeError) as exc:
-                    log.warning("write io error: %s", exc)
+                self._queue_write(block_index, i, editor.io_values(io)[i], label)
 
             row = ParamRow(label, value, spec, changed)
-            if row.spin is not None:
-                row.widget.sliderReleased.connect(write_param)
-                row.widget.sliderReleased.connect(editor.end_gesture)
-                row.spin.editingFinished.connect(write_param)
-            elif row.combo is not None:
-                row.combo.currentIndexChanged.connect(write_param)
-                row.combo.currentIndexChanged.connect(
-                    lambda _i: editor.end_gesture()
-                )
+            self._connect_write(row, editor)
             self.rows.append(row)
             self._lay.insertWidget(self._lay.count() - 1, self._row_widget(row))
         self._apply_color(color)
+
+    @staticmethod
+    def _block_index(editor: PresetEditor, slot_or_io) -> int | None:
+        """Raw on-wire index of the panel's block, or None if it has none."""
+        try:
+            if isinstance(slot_or_io, str):
+                return editor.io_block_index(slot_or_io)
+            return editor.block_index(slot_or_io)
+        except ValueError as exc:
+            log.warning("no on-wire index for %r: %s", slot_or_io, exc)
+            return None
+
+    def _connect_write(self, row: ParamRow, editor: PresetEditor) -> None:
+        """End of interaction → flush now (the changes were already queued)."""
+        if row.spin is not None:
+            row.widget.sliderReleased.connect(self.flush_writes)
+            row.widget.sliderReleased.connect(editor.end_gesture)
+            row.spin.editingFinished.connect(self.flush_writes)
+        elif row.combo is not None:
+            # Each enum selection is a discrete commit: write right away.
+            row.combo.currentIndexChanged.connect(self._flush_soon)
+            row.combo.currentIndexChanged.connect(
+                lambda _i: editor.end_gesture()
+            )
+
+    def _flush_soon(self, *_args) -> None:
+        """Flush on the next event-loop turn (inside a widget's own signal)."""
+        QTimer.singleShot(0, self.flush_writes)
+
+    # --- pedal writes ---
+
+    def _queue_write(self, block_index: int | None, param_idx: int, value,
+                     label: str) -> None:
+        """Queue a parameter value for the pedal, coalescing repeated edits.
+
+        `value` is the editor's typed value: the pedal rejects a write whose
+        MessagePack type does not match (see `device.set_param`). Bools are not
+        writable through op 30 at all, so they are kept in memory only.
+        """
+        if self._device is None or block_index is None:
+            return
+        if isinstance(value, bool):
+            log.debug("%s is a bool: not writable via op 30, kept in memory", label)
+            return
+        self._pending[(block_index, param_idx)] = (value, label)
+        if not self._timer.isActive():
+            self._timer.start()
+
+    def flush_writes(self) -> None:
+        """Write the queued parameter values to the pedal (newest value wins)."""
+        self._timer.stop()
+        if not self._pending:
+            return
+        pending, self._pending = self._pending, {}
+        device = self._device
+        if device is None:
+            return
+        for (block_index, param_idx), (value, label) in pending.items():
+            try:
+                ok = device.set_param(
+                    block_index=block_index, param_idx=param_idx, value=value
+                )
+            except Exception as exc:  # noqa: BLE001 — never break the UI thread
+                log.warning("set_param(%s) failed: %s", label, exc)
+                self.write_failed.emit(f"could not write {label}: {exc}")
+                continue
+            if ok:
+                log.info("wrote %s = %r (blk=%d idx=%d)",
+                         label, value, block_index, param_idx)
+            else:
+                log.warning("pedal rejected %s = %r (blk=%d idx=%d)",
+                            label, value, block_index, param_idx)
+                self.write_failed.emit(f"the pedal rejected {label} = {value!r}")
+
+    def cancel_pending_writes(self) -> None:
+        """Drop queued writes (e.g. another preset is being loaded)."""
+        self._timer.stop()
+        self._pending.clear()
 
     def _row_widget(self, row: ParamRow) -> QWidget:
         w = QWidget()
@@ -400,6 +468,10 @@ class EditPanel(QWidget):
         )
 
     def clear(self) -> None:
+        # The rows go away, so the writes queued for them are flushed now: an
+        # edit must not be lost because another block/preset panel replaced it
+        # (a preset change cancels them first, see EditorView.set_preset).
+        self.flush_writes()
         self.rows = []
         while self._lay.count() > 1:
             item = self._lay.takeAt(0)
@@ -780,6 +852,8 @@ class InspectorPanel(QWidget):
     bypass_toggled = Signal(int)
     model_chosen = Signal(int, str)
     clear_requested = Signal(int)
+    #: Relayed from the Edit panel: the pedal refused a parameter value.
+    write_failed = Signal(str)
 
     def __init__(self) -> None:
         super().__init__()
@@ -796,6 +870,7 @@ class InspectorPanel(QWidget):
 
         self._stack = QStackedWidget()
         self.edit = EditPanel()
+        self.edit.write_failed.connect(self.write_failed)
         scroll = QScrollArea()
         scroll.setWidget(self.edit)
         scroll.setWidgetResizable(True)

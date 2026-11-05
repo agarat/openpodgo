@@ -225,3 +225,77 @@ def test_eco_de_dos_chain_writes_seguidos_no_dispara_reread(app):
     assert win._suppress_chain_echo == 0
     assert win._chain_reread_pending is False
     assert not win._chain_reread_timer.isActive()
+
+
+# --- block focus on the pedal (spec 12: op 78 selects the block) ---
+
+
+class _FakeDevice:
+    """Records select_block calls instead of touching USB."""
+
+    connected = True
+
+    def __init__(self) -> None:
+        self.selected: list[int] = []
+
+    def select_block(self, block_index: int) -> bool:
+        self.selected.append(block_index)
+        return True
+
+
+def test_seleccionar_bloque_lo_selecciona_en_el_pedal(app):
+    """Selecting a block sends op 78 with the raw block index, so the pedal's
+    own screen and knobs follow the app (spec 12)."""
+    win = _window(app)
+    ed = _load_preset(win)
+    device = _FakeDevice()
+    win.device = device
+    win.editor_view.device = device
+
+    slot = next(i for i, b in enumerate(ed.preset.chain) if b is not None)
+    win.editor_view.select_slot(slot)
+
+    assert device.selected == [ed.block_index(slot)]
+
+
+def test_seleccionar_input_usa_su_indice(app):
+    win = _window(app)
+    ed = _load_preset(win)
+    device = _FakeDevice()
+    win.device = device
+    win.editor_view.device = device
+
+    win.editor_view.select_io("input")
+
+    assert device.selected == [ed.io_block_index("input")]
+
+
+def test_slot_vacio_no_selecciona_nada(app):
+    win = _window(app)
+    _load_preset(win)
+    device = _FakeDevice()
+    win.device = device
+    win.editor_view.device = device
+    win.editor_view.select_slot(9)   # empty slot in the fixture
+    assert device.selected == []
+
+
+def test_seleccion_durante_un_read_queda_pendiente(app):
+    """A write during a read stream is refused (and would freeze the UI): the
+    selection waits for the worker to finish (spec 14)."""
+    win = _window(app)
+    ed = _load_preset(win)
+    device = _FakeDevice()
+    win.device = device
+    win.editor_view.device = device
+
+    slot = next(i for i, b in enumerate(ed.preset.chain) if b is not None)
+    win._workers.add(object())        # simulate a read in flight
+    try:
+        win.editor_view.select_slot(slot)
+        assert device.selected == []  # postponed, not lost
+    finally:
+        win._workers.clear()
+
+    win._flush_pending_block_select()
+    assert device.selected == [ed.block_index(slot)]
