@@ -667,7 +667,12 @@ class MainWindow(QMainWindow):
             return
         chain = ed.preset.chain
         block = chain[slot] if slot < len(chain) else None
-        if block is None or param >= len(block.params):
+        if block is None or not 0 <= param < len(block.params):
+            return
+        # The echo of our OWN write arrives here too: the value is already what
+        # the editor shows, and applying it would open an undo step with no
+        # change (the gesture was closed on release).
+        if abs(float(block.params[param]) - float(value)) <= 1e-7:
             return
         # No end_gesture: a knob sweep from the pedal (same slot+idx) coalesces
         # into a single undo step, like dragging a slider.

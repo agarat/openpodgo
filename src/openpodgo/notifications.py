@@ -38,8 +38,8 @@ OP_PRESET_SAVED = 4       # {107: setlist, 108: slot}
 OP_PRESET_LOADED = 8      # {107: setlist, 108: slot}
 OP_PRESET_NAME = 6        # {107: setlist, 108: slot, 109: name}
 OP_TEMPO = 22             # {118: param_id, 119: value}
-OP_SET_PARAM = 30         # {98: block, 26: param, 28: 0, 29: True, 119: value}
-OP_BYPASS = 39            # {98: block, 26: param}  (toggle, sin valor)
+OP_SET_PARAM = 30         # {98: block, 28: param, 26: 0, 29: True, 119: value}
+OP_BYPASS = 39            # {98: block, 28: param}  (toggle, sin valor)
 OP_BLOCK_STATE = 49       # {98: block, 59: enabled}  (ABSOLUTE block state)
 OP_SNAPSHOT_A = 42        # {92: idx}
 OP_SNAPSHOT_B = 46        # {92: idx}  (segunda variante observada)
@@ -54,6 +54,20 @@ OP_CTRL_ASSIGN = 34       # controller changed: {74: ctrl, 98: block, 72: min, 7
 
 #: Candidate offsets of the MessagePack body within the vendor packet.
 _BODY_OFFSETS = (24, 16, 20)
+
+
+def _param_index(inner: dict) -> int | None:
+    """Parameter index of a param event: key 28, falling back to key 26.
+
+    Verified live (both directions: a physical knob turn and the echo of our own
+    op 30 write) the pedal carries the index in **key 28** and leaves key 26 at
+    0. Reading 26 (as this parser used to) yielded 0 for every event, so the UI
+    applied each changed value to the block's FIRST parameter. The fallback
+    keeps the older documented shape (`{26: param, 28: 0}`) readable.
+    """
+    if inner.get(28) is not None:
+        return inner.get(28)
+    return inner.get(26)
 
 
 def _decode_body(raw: bytes) -> dict | None:
@@ -109,13 +123,13 @@ def parse_notification(raw: bytes) -> dict | None:
     if opcode == OP_SET_PARAM:
         return {"type": "set_param", "data": {
             "block": inner.get(98),
-            "param": inner.get(26),
+            "param": _param_index(inner),
             "value": inner.get(119),
         }}
     if opcode == OP_BYPASS:
         return {"type": "bypass", "data": {
             "block": inner.get(98),
-            "param": inner.get(26),
+            "param": _param_index(inner),
         }}
     if opcode == OP_BLOCK_STATE and (75 in inner or 76 in inner):
         # op 49 OVERLOADED: with {75: from_slot, 76: to_slot} it is a

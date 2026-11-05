@@ -154,7 +154,7 @@ python -m pytest                       # offline test suite (no pedal needed)
 
 The suite runs entirely offline against small, sanitized fixtures under
 `tests/fixtures/`. In a fresh clone (no proprietary resources present) it runs
-**355 tests**; a further 28 are skipped because they need the official POD Go
+**357 tests**; a further 28 are skipped because they need the official POD Go
 Edit resources or your own USB captures locally.
 
 RE / hardware tools live in `tools/` (they talk to a real pedal — close the app

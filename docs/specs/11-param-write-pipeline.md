@@ -47,6 +47,16 @@ edit buffer, so any value that never reached it was saved as the old value.
   out the type rule) and no longer coerces to `float`.
 - `MainWindow._flush_editor_params` does the same and skips bools.
 
+### The pedal's echo is not the source of truth for the index
+
+The notification the pedal emits after our write carries the parameter index in
+key 28 (`26` is 0). The parser read `26`, so every echo applied its value to the
+block's **first** parameter: adjusting the second knob moved the first one in
+the UI. `notifications._param_index()` now reads 28 (falling back to 26), which
+matches what the pedal sends for its own physical knob events too, and
+`_on_param_from_device` drops no-op echoes (same value) so they do not add undo
+steps.
+
 ### Feedback instead of silence
 
 `EditPanel.write_failed` → `InspectorPanel.write_failed` →

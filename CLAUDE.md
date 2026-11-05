@@ -18,7 +18,7 @@ presets and UI are platform-agnostic.
 
 ```bash
 . .venv/bin/activate                   # activate the venv (always first)
-python -m pytest                       # 355 tests, all OFFLINE (no pedal)
+python -m pytest                       # 357 tests, all OFFLINE (no pedal)
 python -m pytest tests/test_editor.py  # a single file
 python -m pytest tests/test_editor.py::test_nombre   # a single test
 python -m openpodgo.app                 # launch the UI (or: openpodgo)
@@ -128,3 +128,7 @@ Verified live rules that decide whether a write is applied (all bit us — see
   write handshake.
 - The UI writes on **every** change (coalesced ~80 ms, flushed on release), and
   `_save_to_pedal` flushes the editor's parameters before op 71.
+- In the pedal's `set_param` **notifications** (op 30: a physical knob turn and
+  the echo of our own write) the parameter index is **key 28**; key 26 is 0.
+  Read it with `notifications._param_index()` — reading 26 made every event look
+  like parameter 0 (a knob change moved the block's first parameter).
